@@ -92,19 +92,13 @@ This project builds a cylindrical volumetric display by rapidly spinning an LED 
 
 See `docs/build_guide.html` for complete instructions.
 
-## Design Options
+## Design
 
-### Option 1: Matrix Scanning (Recommended)
+### Matrix Scanning
 - Direct GPIO control of 96 LEDs using 20 pins
 - Lowest cost (~$2 for LEDs)
 - Maximum timing control
 - Monochrome display
-
-### Option 2: Addressable LEDs (APA102)
-- Only 2 GPIO pins (SPI Clock + Data)
-- Simpler wiring, built-in drivers
-- RGB capable
-- Higher cost (~$15 for LEDs)
 
 ## Technology Stack
 
@@ -162,6 +156,6 @@ MIT License - See LICENSE file for details
 
 ---
 
-**Author**: Mak  
+**Author**: Mayank S
 **Project Start**: January 2026  
 **Status**: Active Development
