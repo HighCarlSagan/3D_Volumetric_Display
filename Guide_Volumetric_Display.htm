@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volumetric POV Display - Build Guide</title>
+    <style>
+        :root {
+            --primary: #0a4d68;
+            --secondary: #088395;
+            --accent: #05bfdb;
+            --dark: #1a1a2e;
+            --bg-gradient-1: #f5f7fa;
+            --bg-gradient-2: #c3cfe2;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --section-bg: #ffffff;
+            --table-hover: #f8f9fa;
+            --border-color: #eee;
+            --code-bg: #2d2d44;
+            --code-text: #e0e0e0;
+        }
+        
+        [data-theme="dark"] {
+            --primary: #05bfdb;
+            --secondary: #088395;
+            --accent: #4dd0e1;
+            --dark: #e0e0e0;
+            --bg-gradient-1: #0f0f1e;
+            --bg-gradient-2: #1a1a2e;
+            --text-color: #e0e0e0;
+            --card-bg: #1e1e2e;
+            --section-bg: #252538;
+            --table-hover: #2a2a3e;
+            --border-color: #3a3a4e;
+            --code-bg: #1a1a2e;
+            --code-text: #e0e0e0;
+        }
+        
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background: linear-gradient(135deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 100%);
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        
+        .theme-toggle {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 30px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .theme-toggle:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+        
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .section {
+            background: var(--section-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        h2 { 
+            color: var(--primary); 
+            border-bottom: 3px solid var(--accent); 
+            padding-bottom: 0.5rem; 
+            margin-bottom: 1.5rem; 
+        }
+        h3 { color: var(--secondary); margin: 1.5rem 0 1rem 0; }
+        h4 { color: var(--text-color); }
+        
+        .info-box, .warning-box, .success-box {
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+        .info-box { 
+            background: rgba(51, 154, 240, 0.1); 
+            border-color: #339af0; 
+        }
+        .warning-box { 
+            background: rgba(255, 107, 107, 0.1); 
+            border-color: #ff6b6b; 
+        }
+        .success-box { 
+            background: rgba(81, 207, 102, 0.1); 
+            border-color: #51cf66; 
+        }
+        
+        [data-theme="dark"] .info-box { 
+            background: rgba(51, 154, 240, 0.15); 
+        }
+        [data-theme="dark"] .warning-box { 
+            background: rgba(255, 107, 107, 0.15); 
+        }
+        [data-theme="dark"] .success-box { 
+            background: rgba(81, 207, 102, 0.15); 
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        th {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1rem;
+            text-align: left;
+        }
+        td { 
+            padding: 0.8rem; 
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+        tr:hover { background: var(--table-hover); }
+        .diagram {
+            background: var(--code-bg);
+            color: var(--code-text);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            font-family: monospace;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            border: 1px solid var(--border-color);
+        }
+        
+        .highlight { 
+            background: #fef08a; 
+            padding: 0.2rem 0.4rem; 
+            border-radius: 3px; 
+            font-weight: 600;
+            color: #000;
+        }
+        
+        [data-theme="dark"] .highlight {
+            background: #fbbf24;
+            color: #000;
+        }
+        
+        .winner { color: #51cf66; font-weight: bold; }
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 1.5rem; 
+            margin: 1.5rem 0; 
+        }
+        .card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .card h4 { color: white; margin: 0 0 1rem 0; }
+        ul { margin: 0.5rem 0 0.5rem 2rem; }
+        li { margin: 0.3rem 0; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+            <span id="theme-icon">🌙</span>
+        </button>
+        <h1>⚡ Volumetric POV Display Build Guide</h1>
+        <p>Complete Technical Documentation for Mains-Powered 3D Display</p>
+    </div>
+
+    <div class="container">
+        
+        <!-- SECTION 1: HOW IT WORKS -->
+        <div class="section">
+            <h2>1. How It Works</h2>
+            
+            <div class="info-box">
+                <h4>🧠 The Core Concept</h4>
+                <p><strong>Persistence of Vision (POV):</strong> Your brain retains visual information for ~100ms after light stops entering your eye. By spinning an LED matrix at 1200-1800 RPM (20-30 Hz), individual LED flashes merge into a solid 3D image.</p>
+            </div>
+
+            <div class="diagram">
+<pre>How the Display Creates 3D Images:
+
+         LED Matrix (vertical)
+              ●●●●●●●●  ← 8 columns
+              ●●●●●●●●
+              ●●●●●●●●  ← 12 rows
+                 ║
+                 ║ Spins around central axis
+                 ║
+         ════════╩════════  Motor shaft
+              
+As it rotates 360°:
+- IR sensor detects reference point once per rotation
+- Display shows different "slices" at each angle
+- Your eye sees complete 3D cylinder of light
+
+Data Format: Polar coordinates (r, θ, z)
+- r = radius (LED position on board)
+- θ = angle (changes as board rotates)
+- z = height (LED row number)
+</pre>
+            </div>
+
+            <div class="grid">
+                <div class="card">
+                    <h4>🔲 LED Matrix</h4>
+                    <ul>
+                        <li>8×12 or 16×12 LEDs</li>
+                        <li>Mounted vertically on PCB</li>
+                        <li>Forms one radial slice</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>🔄 Rotation</h4>
+                    <ul>
+                        <li>1200-1800 RPM speed</li>
+                        <li>Creates cylindrical volume</li>
+                        <li>Motor mounted stationary</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>📍 Synchronization</h4>
+                    <ul>
+                        <li>IR photodiode + reflector</li>
+                        <li>Detects once per rotation</li>
+                        <li>Triggers image display</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>⚡ Power</h4>
+                    <ul>
+                        <li>Wireless inductive coils</li>
+                        <li>5V @ 300-500mA typical</li>
+                        <li>No wires to rotor!</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 2: CONTROLLER CHOICE -->
+        <div class="section">
+            <h2>2. Controller Selection: RP2040 vs ESP32</h2>
+            
+            <table>
+                <tr>
+                    <th>Feature</th>
+                    <th>RP2040 (Recommended)</th>
+                    <th>ESP32-S3</th>
+                </tr>
+                <tr>
+                    <td><strong>Simultaneous GPIO</strong></td>
+                    <td class="winner">✅ All pins in 1 cycle</td>
+                    <td>❌ Bus contention issues</td>
+                </tr>
+                <tr>
+                    <td><strong>PIO State Machines</strong></td>
+                    <td class="winner">✅ 8 hardware coprocessors</td>
+                    <td>❌ None</td>
+                </tr>
+                <tr>
+                    <td><strong>Speed</strong></td>
+                    <td>133 MHz (250+ OC)</td>
+                    <td class="winner">✅ 240 MHz</td>
+                </tr>
+                <tr>
+                    <td><strong>WiFi/Bluetooth</strong></td>
+                    <td>❌ None</td>
+                    <td class="winner">✅ Built-in</td>
+                </tr>
+                <tr>
+                    <td><strong>Price</strong></td>
+                    <td class="winner">✅ $1-4</td>
+                    <td>$2-3</td>
+                </tr>
+                <tr>
+                    <td><strong>POV Display Suitability</strong></td>
+                    <td class="winner">✅ Excellent</td>
+                    <td>⚠️ Workable but harder</td>
+                </tr>
+            </table>
+
+            <div class="success-box">
+                <h4>✅ Recommendation: RP2040</h4>
+                <p><strong>Why RP2040 wins:</strong> The ability to update all GPIO pins simultaneously is critical for clean POV images. ESP32's bus contention creates timing variations that cause visible ghosting at high speeds.</p>
+                <p><strong>Best module:</strong> Waveshare RP2040-Zero (23×18mm, 29 GPIO, USB-C, ~$4)</p>
+            </div>
+
+            <div class="info-box">
+                <h4>💡 What are PIO State Machines?</h4>
+                <p>RP2040's unique feature: 8 programmable I/O coprocessors that can handle precise timing tasks (LED scanning, encoder reading, PWM) independently of the main CPU. Perfect for POV displays where timing is critical.</p>
+            </div>
+        </div>
+
+        <!-- SECTION 3: POWER SYSTEM -->
+        <div class="section">
+            <h2>3. Inductive Power Transfer System</h2>
+            
+            <h3>Why Wireless Power?</h3>
+            <p>The rotor spins continuously, so wired connections are impossible. Three options exist:</p>
+
+            <table>
+                <tr>
+                    <th>Method</th>
+                    <th>Reliability</th>
+                    <th>Pros</th>
+                    <th>Cons</th>
+                </tr>
+                <tr>
+                    <td>Battery</td>
+                    <td>High</td>
+                    <td>Simple, portable</td>
+                    <td>Limited runtime, recharging needed</td>
+                </tr>
+                <tr>
+                    <td>Slip Rings</td>
+                    <td>Medium</td>
+                    <td>High current capable</td>
+                    <td>Wears out, sparks, noisy</td>
+                </tr>
+                <tr>
+                    <td class="winner">Inductive Coils ⭐</td>
+                    <td class="winner">Very High</td>
+                    <td>No wear, silent, clean power</td>
+                    <td>Limited gap tolerance</td>
+                </tr>
+            </table>
+
+            <div class="diagram">
+<pre>Power System Architecture:
+
+STATIONARY BASE:
+AC Mains → 12V PSU → 5V Buck → TX Coil (horizontal)
+                                    ║
+                            (Magnetic coupling, 2-5mm gap)
+                                    ║
+ROTATING ASSEMBLY:              RX Coil (horizontal)
+                                    ↓
+                          Bridge Rectifier (MB6S)
+                                    ↓
+                           1000µF Smoothing Cap
+                                    ↓
+                          5V LDO (AMS1117-5.0)
+                            ↓              ↓
+                      LEDs (5V)    3.3V LDO (AMS1117-3.3)
+                                           ↓
+                                      RP2040 (3.3V)
+
+Power Budget (8×12 matrix):
+- LEDs (scanning): 200-300mA
+- RP2040: 50mA
+- IR LED: 20mA
+- Total: 300-400mA @ 5V ✅ Well within 1A wireless capability
+</pre>
+            </div>
+
+            <div class="success-box">
+                <h4>✅ Recommended Setup</h4>
+                <p><strong>Easy option:</strong> Adafruit Wireless 5V/1A Charging Coil Set (#1407, ~$10)</p>
+                <ul>
+                    <li>Built-in regulation on RX side</li>
+                    <li>Proven reliability</li>
+                    <li>Easy integration</li>
+                    <li>Good documentation</li>
+                </ul>
+            </div>
+
+            <div class="warning-box">
+                <h4>⚠️ Alignment is Critical</h4>
+                <ul>
+                    <li>Coils must be concentric (same center)</li>
+                    <li>Optimal gap: 3mm (2mm = tight, 5mm = lower efficiency)</li>
+                    <li>Even 5mm lateral offset cuts efficiency by 50%</li>
+                    <li>Use standoffs or spacers for precise gap</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- SECTION 4: DESIGN OPTIONS -->
+        <div class="section">
+            <h2>4. Two Design Approaches</h2>
+            
+            <h3>Option 1: Matrix Scanning (Recommended)</h3>
+            
+            <div class="info-box">
+                <h4>How Matrix Scanning Works</h4>
+                <p>Instead of 96 pins for 96 LEDs, use <strong>20 pins</strong>:</p>
+                <ul>
+                    <li>8 column pins (anodes) + 12 row pins (cathodes)</li>
+                    <li>Activate one row at a time, set column pattern</li>
+                    <li>Scan through all rows at ~10kHz</li>
+                    <li>Your eye sees all rows lit due to POV</li>
+                </ul>
+            </div>
+
+            <div class="diagram">
+<pre>GPIO Pin Assignment (RP2040):
+
+GPIO 0-7    : LED Columns (8 pins)
+GPIO 8-19   : LED Rows (12 pins)
+GPIO 20     : IR Position Sensor (input)
+GPIO 21     : Motor PWM (output)
+GPIO 22     : Status LED (optional)
+
+Total: 21 pins used, 9 still available
+
+LED Wiring:
+Each LED anode → Column line
+Each LED cathode → Row line
+To light LED[Row3, Col5]:
+  Set GPIO_ROW3 = LOW
+  Set GPIO_COL5 = HIGH
+  Current flows: Col5 → LED → Row3 → GND
+</pre>
+            </div>
+
+            <p><strong>Pros:</strong> Cheapest (~$2 for LEDs), full timing control, fastest updates</p>
+            <p><strong>Cons:</strong> More soldering (96 LEDs), complex PCB routing, careful timing needed</p>
+
+            <h3>Option 2: Addressable LEDs (APA102)</h3>
+            
+            <div class="info-box">
+                <h4>Smart LEDs with Built-in Drivers</h4>
+                <p>Each APA102 LED contains RGB LED + microcontroller + driver chip</p>
+                <ul>
+                    <li><strong>Only 2 GPIO pins</strong> for unlimited LEDs (Clock + Data)</li>
+                    <li>Daisy-chain configuration</li>
+                    <li>Built-in current regulation</li>
+                    <li>RGB capability for future expansion</li>
+                </ul>
+            </div>
+
+            <div class="diagram">
+<pre>Addressable LED Wiring:
+
+RP2040 GPIO 2 (SPI Clock)  ───→ LED[0] → LED[1] → ... → LED[95]
+RP2040 GPIO 3 (SPI Data)   ───┘
+
+Each LED:
+  VCC → 5V
+  GND → GND
+  CI ← Clock from previous LED (or RP2040)
+  DI ← Data from previous LED (or RP2040)
+  CO → Clock to next LED
+  DO → Data to next LED
+
+Update Time (96 LEDs at 10MHz SPI): ~314 microseconds
+Still fast enough for POV! ✅
+</pre>
+            </div>
+
+            <p><strong>Pros:</strong> Simple wiring, RGB capable, many GPIO free, built-in current control</p>
+            <p><strong>Cons:</strong> More expensive (~$15 vs $2), higher power, slower protocol</p>
+
+            <table>
+                <tr>
+                    <th>Aspect</th>
+                    <th>Matrix Scanning</th>
+                    <th>Addressable LEDs</th>
+                </tr>
+                <tr>
+                    <td>Cost (96 LEDs)</td>
+                    <td class="winner">~$2</td>
+                    <td>~$15</td>
+                </tr>
+                <tr>
+                    <td>GPIO Pins</td>
+                    <td>20 pins</td>
+                    <td class="winner">2 pins</td>
+                </tr>
+                <tr>
+                    <td>Soldering</td>
+                    <td>96 LEDs + resistors</td>
+                    <td class="winner">Strip or pre-made</td>
+                </tr>
+                <tr>
+                    <td>Update Speed</td>
+                    <td class="winner">Fastest</td>
+                    <td>Fast enough</td>
+                </tr>
+                <tr>
+                    <td>RGB Color</td>
+                    <td>No (monochrome only)</td>
+                    <td class="winner">Yes</td>
+                </tr>
+                <tr>
+                    <td>Best For</td>
+                    <td>Learning, low cost, max control</td>
+                    <td>Quick build, future expansion</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- SECTION 5: 16x12 SCALING -->
+        <div class="section">
+            <h2>5. Scaling to 16×12 Configuration</h2>
+            
+            <div class="success-box">
+                <h4>✅ Yes, 16×12 is Achievable!</h4>
+                <p>Doubling to 192 LEDs creates a much more impressive display and is feasible with mains power.</p>
+            </div>
+
+            <h3>What Changes?</h3>
+
+            <table>
+                <tr>
+                    <th>Aspect</th>
+                    <th>8×12 (96 LEDs)</th>
+                    <th>16×12 (192 LEDs)</th>
+                </tr>
+                <tr>
+                    <td><strong>GPIO Needed</strong></td>
+                    <td>20 pins</td>
+                    <td>28 pins (need custom PCB)</td>
+                </tr>
+                <tr>
+                    <td><strong>Power (scanning)</strong></td>
+                    <td>250mA avg</td>
+                    <td>400mA avg ✅</td>
+                </tr>
+                <tr>
+                    <td><strong>Board Width</strong></td>
+                    <td>~40mm</td>
+                    <td>~80mm</td>
+                </tr>
+                <tr>
+                    <td><strong>Rotational Inertia</strong></td>
+                    <td>Baseline</td>
+                    <td>4× higher (need better motor)</td>
+                </tr>
+                <tr>
+                    <td><strong>Visual Quality</strong></td>
+                    <td>Good</td>
+                    <td class="winner">Excellent!</td>
+                </tr>
+            </table>
+
+            <div class="info-box">
+                <h4>💡 GPIO Solution for 16×12</h4>
+                <p><strong>Matrix Scanning:</strong> 16 columns + 12 rows = 28 GPIO needed</p>
+                <p>Standard RP2040 modules break out 20-26 GPIO → <strong>Need custom PCB with bare RP2040 chip</strong> to access all 30 GPIO.</p>
+                <p><strong>Alternative:</strong> Use addressable LEDs (still only 2 GPIO for 192 LEDs!)</p>
+            </div>
+
+            <div class="warning-box">
+                <h4>⚠️ Mechanical Challenges</h4>
+                <ul>
+                    <li><strong>Balance critical:</strong> 80mm wide board needs precise centering</li>
+                    <li><strong>More inertia:</strong> Takes longer to spin up, need more powerful motor</li>
+                    <li><strong>Air resistance:</strong> 2× the drag, motor works harder</li>
+                    <li><strong>Vibration:</strong> Even 1mm offset creates noticeable wobble</li>
+                </ul>
+                <p><strong>Pro tip:</strong> Mount heavy components (RP2040, caps) exactly on rotation axis</p>
+            </div>
+
+            <h3>Recommended Path</h3>
+            <ol>
+                <li><strong>Start with 8×12:</strong> Prove concept, perfect mechanics, test power system</li>
+                <li><strong>Design custom PCB:</strong> Bare RP2040 chip + all 30 GPIO broken out</li>
+                <li><strong>Upgrade motor:</strong> Brushless recommended for larger rotor</li>
+                <li><strong>Add balancing:</strong> Symmetrical layout + counterweights if needed</li>
+            </ol>
+
+            <div class="info-box">
+                <h4>💡 Middle Ground: 12×12 Configuration</h4>
+                <p>12 columns + 12 rows = 24 GPIO (fits on RP2040-Zero!)</p>
+                <ul>
+                    <li>144 LEDs (50% more than 8×12)</li>
+                    <li>Square format (easier to balance)</li>
+                    <li>Power: ~300mA (safe)</li>
+                    <li>No custom PCB needed</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- SECTION 6: MECHANICAL & PCB -->
+        <div class="section">
+            <h2>6. Mechanical & PCB Design</h2>
+            
+            <h3>Motor Selection</h3>
+
+            <div class="grid">
+                <div class="card">
+                    <h4>Brushed DC Motor</h4>
+                    <ul>
+                        <li>Simple PWM control</li>
+                        <li>Very cheap ($2-5)</li>
+                        <li>Good for prototyping</li>
+                        <li>Electrical noise, wears out</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>Brushless Motor ⭐</h4>
+                    <ul>
+                        <li>Quiet, efficient, long-life</li>
+                        <li>Needs ESC controller</li>
+                        <li>Best for final build</li>
+                        <li>1806 2300KV ideal size</li>
+                    </ul>
+                </div>
+            </div>
+
+            <p><strong>Target specs:</strong> 2000-3000 RPM no-load, 0.5-1.0 N⋅cm torque, <300mA current</p>
+
+            <h3>PCB Design Strategy</h3>
+
+            <p><strong>Two-Board Approach (Recommended):</strong></p>
+            
+            <div class="diagram">
+<pre>Board 1 - LED Matrix (Vertical):
+    ┌─────────────┐
+    │  ●●●●●●●●   │ ← 8 or 16 columns
+    │  ●●●●●●●●   │
+    │  ●●●●●●●●   │ ← 12 rows
+    │  (96 LEDs)  │
+    │             │
+    └─────║║║─────┘
+      Edge connector
+
+Board 2 - Controller (Horizontal):
+    ┌──────────────────┐
+    │  [RP2040] [LDOs] │
+    │  [Rectifier]     │
+    │                  │
+    │  ╔═══════════╗   │ ← RX Coil area
+    │  ║   Coil    ║   │   (40-50mm Ø)
+    │  ╚═══════════╝   │
+    └──────────────────┘
+           ║
+    Motor shaft passes through
+
+Connected at 90° via headers/edge connector
+</pre>
+            </div>
+
+            <h3>KiCad Design Tips</h3>
+            <ul>
+                <li><strong>LED Matrix Board:</strong> 2-layer, columns on top, rows on bottom, 1.6mm FR-4</li>
+                <li><strong>Controller Board:</strong> 2-layer sufficient for modules, 4-layer for bare RP2040</li>
+                <li><strong>Trace width:</strong> 0.5mm for signals, 1-2mm for power</li>
+                <li><strong>Component placement:</strong> Heavy parts near rotation axis</li>
+                <li><strong>Mounting holes:</strong> For mechanical stability and motor coupling</li>
+            </ul>
+
+            <h3>Balance & Safety</h3>
+
+            <div class="warning-box">
+                <h4>⚠️ Critical Safety Considerations</h4>
+                <ul>
+                    <li><strong>Balance:</strong> Test at low RPM first, gradually increase speed</li>
+                    <li><strong>Enclosure:</strong> Clear acrylic case to contain debris if something breaks</li>
+                    <li><strong>Emergency stop:</strong> Accessible kill switch</li>
+                    <li><strong>Secure mounting:</strong> Motor firmly attached, shaft properly coupled</li>
+                    <li><strong>Eye protection:</strong> When testing at full speed</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- SECTION 7: BUILD PHASES -->
+        <div class="section">
+            <h2>7. Recommended Build Phases</h2>
+            
+            <h3>Phase 1: Static Testing</h3>
+            <ul>
+                <li>Build LED matrix on breadboard</li>
+                <li>Test RP2040 driving LEDs (no rotation)</li>
+                <li>Verify matrix scanning or addressable LED control</li>
+                <li>Display simple test patterns</li>
+            </ul>
+
+            <h3>Phase 2: Power System</h3>
+            <ul>
+                <li>Set up inductive power transfer</li>
+                <li>Mount TX coil on base, RX on test platform</li>
+                <li>Verify stable 5V/3.3V while rotating by hand</li>
+                <li>Test with LED matrix powered</li>
+            </ul>
+
+            <h3>Phase 3: Mechanical Assembly</h3>
+            <ul>
+                <li>Design & fabricate PCBs in KiCad</li>
+                <li>Assemble LED matrix + controller boards</li>
+                <li>Mount on motor shaft with proper coupling</li>
+                <li>Balance rotor assembly carefully</li>
+            </ul>
+
+            <h3>Phase 4: Position Sensing & Speed Control</h3>
+            <ul>
+                <li>Install IR LED and photodiode</li>
+                <li>Add reflective target on base</li>
+                <li>Implement motor speed control (PWM)</li>
+                <li>Test synchronization at low speed</li>
+            </ul>
+
+            <h3>Phase 5: Software & Content</h3>
+            <ul>
+                <li>Write display firmware (matrix scanning or SPI)</li>
+                <li>Implement position-triggered display updates</li>
+                <li>Create volumetric data pipeline (Blender → binary)</li>
+                <li>Test with simple 3D shapes, then complex animations</li>
+            </ul>
+        </div>
+
+        <!-- SECTION 8: SHOPPING LIST -->
+        <div class="section">
+            <h2>8. Complete Shopping List</h2>
+            
+            <h3>Electronics (8×12 Matrix Version)</h3>
+            <table>
+                <tr>
+                    <th>Component</th>
+                    <th>Specification</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                </tr>
+                <tr>
+                    <td>Waveshare RP2040-Zero</td>
+                    <td>23×18mm module</td>
+                    <td>1</td>
+                    <td>$4</td>
+                </tr>
+                <tr>
+                    <td>Inductive charging coils</td>
+                    <td>Adafruit #1407 or equivalent</td>
+                    <td>1 set</td>
+                    <td>$10</td>
+                </tr>
+                <tr>
+                    <td>LEDs (0805)</td>
+                    <td>Orange/Red, high brightness</td>
+                    <td>100</td>
+                    <td>$2-5</td>
+                </tr>
+                <tr>
+                    <td>IR sensor</td>
+                    <td>TCRT5000 or similar</td>
+                    <td>1</td>
+                    <td>$1</td>
+                </tr>
+                <tr>
+                    <td>LDO regulators</td>
+                    <td>AMS1117-5.0, AMS1117-3.3</td>
+                    <td>2</td>
+                    <td>$1</td>
+                </tr>
+                <tr>
+                    <td>Bridge rectifier</td>
+                    <td>MB6S or similar</td>
+                    <td>1</td>
+                    <td>$0.30</td>
+                </tr>
+                <tr>
+                    <td>Capacitors</td>
+                    <td>1000µF, 100µF, 10µF, 100nF</td>
+                    <td>Set</td>
+                    <td>$2</td>
+                </tr>
+                <tr>
+                    <td>MOSFET</td>
+                    <td>2N7002 SOT-23</td>
+                    <td>1</td>
+                    <td>$0.20</td>
+                </tr>
+                <tr>
+                    <td>Motor</td>
+                    <td>Brushless 1806 or brushed DC</td>
+                    <td>1</td>
+                    <td>$5-15</td>
+                </tr>
+                <tr>
+                    <td>PCB fabrication</td>
+                    <td>2× boards from JLCPCB</td>
+                    <td>5 sets</td>
+                    <td>$10-20</td>
+                </tr>
+            </table>
+
+            <h3>Mechanical Parts</h3>
+            <ul>
+                <li>3D printed motor mount & enclosure (~$5 filament)</li>
+                <li>Motor shaft coupling ($2-5)</li>
+                <li>Clear acrylic safety enclosure ($10-15)</li>
+                <li>Standoffs, screws, hardware ($3-5)</li>
+            </ul>
+
+            <p><strong>Total Estimated Cost: $55-85</strong> (8×12 matrix version)</p>
+            <p><strong>16×12 version:</strong> Add $15-25 for custom PCB with bare RP2040 chip</p>
+        </div>
+
+        <!-- SECTION 9: QUICK COMPARISON -->
+        <div class="section">
+            <h2>9. Quick Decision Guide</h2>
+            
+            <div class="success-box">
+                <h4>✅ Recommended Starting Configuration</h4>
+                <p><strong>Controller:</strong> RP2040 (Waveshare RP2040-Zero)</p>
+                <p><strong>LEDs:</strong> 8×12 matrix scanning (96 discrete 0805 LEDs)</p>
+                <p><strong>Power:</strong> Adafruit wireless charging coils</p>
+                <p><strong>Motor:</strong> Small brushed DC for prototype, upgrade to brushless later</p>
+                <p><strong>Why:</strong> Proven design, lowest cost, maximum learning, good performance</p>
+            </div>
+
+            <table>
+                <tr>
+                    <th>If You Want...</th>
+                    <th>Choose This</th>
+                </tr>
+                <tr>
+                    <td>Lowest cost, maximum control</td>
+                    <td>8×12 matrix scanning with RP2040</td>
+                </tr>
+                <tr>
+                    <td>Quick build, simple wiring</td>
+                    <td>8×12 addressable LEDs (APA102)</td>
+                </tr>
+                <tr>
+                    <td>Best visual quality</td>
+                    <td>16×12 matrix scanning (custom PCB)</td>
+                </tr>
+                <tr>
+                    <td>RGB color capability</td>
+                    <td>Addressable APA102 LEDs</td>
+                </tr>
+                <tr>
+                    <td>Easiest first project</td>
+                    <td>8×12 matrix, pre-made modules, breadboard prototype first</td>
+                </tr>
+            </table>
+
+            <h3>Key Success Factors</h3>
+            <ol>
+                <li><strong>Balance is critical:</strong> Spend time getting rotor perfectly centered</li>
+                <li><strong>Start slow:</strong> Test at 300 RPM before going to 1800 RPM</li>
+                <li><strong>Power first:</strong> Prove wireless power works before adding complexity</li>
+                <li><strong>Incremental testing:</strong> Each phase should work before moving on</li>
+                <li><strong>Safety always:</strong> Enclosure, emergency stop, eye protection</li>
+            </ol>
+        </div>
+
+        <div style="background: #1a1a2e; color: white; text-align: center; padding: 2rem; margin-top: 2rem;">
+            <p>Good luck with your volumetric POV display build! Start with the basics, test thoroughly, and scale up gradually.</p>
+            <p style="margin-top: 1rem; opacity: 0.7;">Next steps: Firmware development guide (coming in next response)</p>
+        </div>
+    </div>
+    
+    <script>
+        // Check for saved theme preference or default to light mode
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        updateThemeIcon(currentTheme);
+
+        function toggleTheme() {
+            const theme = document.documentElement.getAttribute('data-theme');
+            const newTheme = theme === 'light' ? 'dark' : 'light';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('theme-icon');
+            icon.textContent = theme === 'light' ? '🌙' : '☀️';
+        }
+    </script>
+</body>
+</html>
