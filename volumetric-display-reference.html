@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VOL-1 — Volumetric Display Design Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #080b0f;
+    --bg2:       #0d1117;
+    --bg3:       #111820;
+    --panel:     #0f1923;
+    --border:    #1e2d3d;
+    --border2:   #243447;
+    --accent:    #00d4ff;
+    --accent2:   #ff6b35;
+    --accent3:   #7fff6e;
+    --text:      #c8d8e8;
+    --text-dim:  #5a7a96;
+    --text-bright:#e8f4ff;
+    --mono:      'Share Tech Mono', monospace;
+    --sans:      'DM Sans', sans-serif;
+    --display:   'Syne', sans-serif;
+    --glow:      0 0 20px rgba(0,212,255,0.15);
+    --glow-hot:  0 0 30px rgba(0,212,255,0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── GRID OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.025) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── SCANLINE ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.07) 2px,
+      rgba(0,0,0,0.07) 4px
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── SIDEBAR NAV ── */
+  nav {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 220px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    padding: 32px 0;
+  }
+
+  .nav-brand {
+    padding: 0 24px 28px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+
+  .nav-brand .logo-text {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    display: block;
+  }
+
+  .nav-brand .logo-sub {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    display: block;
+    margin-top: 4px;
+  }
+
+  .nav-section-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 12px 24px 6px;
+  }
+
+  nav a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 24px;
+    font-size: 13px;
+    color: var(--text-dim);
+    text-decoration: none;
+    transition: all 0.2s;
+    font-family: var(--sans);
+    border-left: 2px solid transparent;
+    font-weight: 400;
+  }
+
+  nav a:hover {
+    color: var(--text-bright);
+    background: rgba(0,212,255,0.05);
+    border-left-color: var(--accent);
+  }
+
+  nav a .nav-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--border2);
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  nav a:hover .nav-dot { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+
+  .nav-footer {
+    margin-top: auto;
+    padding: 20px 24px 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .nav-footer .version {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── MAIN CONTENT ── */
+  main {
+    margin-left: 220px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 80px 60px 60px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--bg2) 0%, var(--bg) 60%);
+  }
+
+  .hero::before {
+    content: 'POV';
+    position: absolute;
+    right: -20px; top: -40px;
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 280px;
+    color: rgba(0,212,255,0.03);
+    pointer-events: none;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+
+  .hero-tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .hero-tag::before {
+    content: '';
+    display: block;
+    width: 24px; height: 1px;
+    background: var(--accent);
+    box-shadow: var(--glow);
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 52px;
+    line-height: 1.05;
+    color: var(--text-bright);
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+  }
+
+  h1 span { color: var(--accent); }
+
+  .hero-desc {
+    max-width: 600px;
+    color: var(--text-dim);
+    font-size: 16px;
+    line-height: 1.7;
+    margin-bottom: 36px;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 36px;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .stat-val {
+    font-family: var(--mono);
+    font-size: 22px;
+    color: var(--accent);
+    font-weight: 400;
+    text-shadow: var(--glow);
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-family: var(--mono);
+  }
+
+  /* ── SECTIONS ── */
+  section {
+    padding: 60px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  section:nth-child(even) { background: rgba(255,255,255,0.01); }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 36px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    opacity: 0.7;
+  }
+
+  h2 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 28px;
+    color: var(--text-bright);
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 17px;
+    color: var(--text-bright);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  h3::before {
+    content: '';
+    display: block;
+    width: 3px; height: 16px;
+    background: var(--accent2);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  p { color: var(--text); margin-bottom: 14px; font-weight: 300; }
+  p:last-child { margin-bottom: 0; }
+  strong { color: var(--text-bright); font-weight: 500; }
+
+  /* ── PANELS / CARDS ── */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+
+  .panel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .panel-sm {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px;
+  }
+
+  /* ── SPEC TABLE ── */
+  .spec-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    margin-bottom: 20px;
+  }
+
+  .spec-table th {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border2);
+    background: rgba(0,0,0,0.2);
+    font-weight: 400;
+  }
+
+  .spec-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: top;
+  }
+
+  .spec-table tr:last-child td { border-bottom: none; }
+
+  .spec-table tr:hover td { background: rgba(0,212,255,0.03); }
+
+  .spec-table td:first-child {
+    font-family: var(--mono);
+    color: var(--accent);
+    font-size: 12.5px;
+    white-space: nowrap;
+    width: 180px;
+  }
+
+  .spec-table td.val {
+    color: var(--text-bright);
+    font-weight: 400;
+  }
+
+  .spec-table td.note {
+    color: var(--text-dim);
+    font-size: 12.5px;
+    font-style: italic;
+  }
+
+  /* ── BOM TABLE ── */
+  .bom-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 20px 0;
+  }
+
+  .bom-table th {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 10px 14px;
+    text-align: left;
+    background: rgba(0,0,0,0.3);
+    border-bottom: 1px solid var(--border2);
+    font-weight: 400;
+  }
+
+  .bom-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: top;
+  }
+
+  .bom-table tr:last-child td { border-bottom: none; }
+  .bom-table tr:hover td { background: rgba(0,212,255,0.03); }
+
+  .part-name {
+    font-family: var(--mono);
+    color: var(--text-bright);
+    font-size: 12.5px;
+    font-weight: 400;
+  }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 3px;
+    border: 1px solid;
+    white-space: nowrap;
+  }
+
+  .badge-rotor  { color: var(--accent);  border-color: rgba(0,212,255,0.35); background: rgba(0,212,255,0.08); }
+  .badge-base   { color: var(--accent2); border-color: rgba(255,107,53,0.35); background: rgba(255,107,53,0.08); }
+  .badge-mech   { color: var(--accent3); border-color: rgba(127,255,110,0.35); background: rgba(127,255,110,0.08); }
+  .badge-shared { color: #b8a0ff;        border-color: rgba(184,160,255,0.35); background: rgba(184,160,255,0.08); }
+  .badge-warn   { color: #ffd066;        border-color: rgba(255,208,102,0.35); background: rgba(255,208,102,0.08); }
+  .badge-ok     { color: var(--accent3); border-color: rgba(127,255,110,0.35); background: rgba(127,255,110,0.08); }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    border-left: 3px solid;
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-radius: 0 4px 4px 0;
+    font-size: 13.5px;
+  }
+
+  .callout-info  { border-color: var(--accent);  background: rgba(0,212,255,0.06);  color: #90d8ef; }
+  .callout-warn  { border-color: #ffd066;         background: rgba(255,208,102,0.06); color: #d4af6e; }
+  .callout-crit  { border-color: var(--accent2);  background: rgba(255,107,53,0.06); color: #d4906e; }
+  .callout-ok    { border-color: var(--accent3);  background: rgba(127,255,110,0.06); color: #90cf8a; }
+
+  .callout strong { color: inherit; font-weight: 600; }
+
+  /* ── CODE / MONO BLOCKS ── */
+  .mono-block {
+    background: #050810;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px 20px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    line-height: 1.8;
+    overflow-x: auto;
+    margin: 12px 0;
+  }
+
+  .mono-block .dim { color: var(--text-dim); }
+  .mono-block .hi  { color: var(--accent3); }
+  .mono-block .hi2 { color: var(--accent2); }
+  .mono-block .com { color: #3a5a70; }
+
+  /* ── FLOW DIAGRAM ── */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    margin: 16px 0;
+  }
+
+  .flow-node {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 5px;
+    padding: 10px 16px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--text-bright);
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .flow-node.accent { border-color: var(--accent); color: var(--accent); background: rgba(0,212,255,0.06); }
+  .flow-node.warn   { border-color: var(--accent2); color: var(--accent2); background: rgba(255,107,53,0.06); }
+
+  .flow-arrow {
+    color: var(--text-dim);
+    font-size: 16px;
+    padding: 0 8px;
+    flex-shrink: 0;
+  }
+
+  /* ── POWER BUDGET ── */
+  .power-row {
+    display: flex;
+    align-items: center;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+    font-size: 13px;
+  }
+
+  .power-row:last-child { border-bottom: none; }
+
+  .power-label { flex: 1; color: var(--text); font-weight: 300; }
+  .power-val   { font-family: var(--mono); color: var(--accent); font-size: 13px; width: 80px; text-align: right; }
+  .power-bar   { width: 120px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .power-fill  { height: 100%; border-radius: 2px; background: var(--accent); opacity: 0.7; }
+
+  .power-total {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0 0;
+    border-top: 2px solid var(--border2);
+    margin-top: 8px;
+    font-family: var(--mono);
+  }
+
+  .power-total .label { color: var(--text-dim); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; }
+  .power-total .total-val { color: var(--accent2); font-size: 16px; text-shadow: 0 0 12px rgba(255,107,53,0.4); }
+
+  /* ── TIMELINE / STEPS ── */
+  .steps { display: flex; flex-direction: column; gap: 0; }
+
+  .step {
+    display: flex;
+    gap: 20px;
+    position: relative;
+    padding-bottom: 24px;
+  }
+
+  .step:last-child { padding-bottom: 0; }
+
+  .step-num-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 32px;
+  }
+
+  .step-num {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .step-line {
+    flex: 1;
+    width: 1px;
+    background: var(--border);
+    margin-top: 4px;
+  }
+
+  .step:last-child .step-line { display: none; }
+
+  .step-body { padding-top: 5px; flex: 1; }
+  .step-title { font-weight: 500; color: var(--text-bright); margin-bottom: 6px; font-size: 14.5px; }
+  .step-desc  { color: var(--text-dim); font-size: 13.5px; font-weight: 300; }
+
+  /* ── TWO-COL LAYOUT ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  @media (max-width: 1100px) { .three-col { grid-template-columns: 1fr 1fr; } }
+
+  /* ── INLINE HIGHLIGHT ── */
+  code {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent3);
+    background: rgba(127,255,110,0.08);
+    padding: 1px 6px;
+    border-radius: 3px;
+    border: 1px solid rgba(127,255,110,0.15);
+  }
+
+  /* ── ARCHITECTURE BLOCK ── */
+  .arch {
+    background: #050810;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 28px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 2;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  .arch .a1 { color: var(--accent); }
+  .arch .a2 { color: var(--accent2); }
+  .arch .a3 { color: var(--accent3); }
+  .arch .a4 { color: #b8a0ff; }
+  .arch .dim { color: #2a3d52; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════ NAV -->
+<nav>
+  <div class="nav-brand">
+    <span class="logo-text">VOL-1</span>
+    <span class="logo-sub">Design Reference v1.0</span>
+  </div>
+
+  <span class="nav-section-label">Overview</span>
+  <a href="#overview"><span class="nav-dot"></span>System Architecture</a>
+  <a href="#ir"><span class="nav-dot"></span>IR Feedback Loop</a>
+
+  <span class="nav-section-label">Hardware</span>
+  <a href="#motor"><span class="nav-dot"></span>Motor &amp; Drive</a>
+  <a href="#leds"><span class="nav-dot"></span>LEDs</a>
+  <a href="#mcu"><span class="nav-dot"></span>Microcontrollers</a>
+  <a href="#power"><span class="nav-dot"></span>Power System</a>
+  <a href="#battery"><span class="nav-dot"></span>Battery</a>
+  <a href="#inductive"><span class="nav-dot"></span>Inductive Transfer</a>
+  <a href="#imu"><span class="nav-dot"></span>IMU</a>
+
+  <span class="nav-section-label">Mechanical</span>
+  <a href="#enclosure"><span class="nav-dot"></span>Enclosure Design</a>
+  <a href="#rotor-pcb"><span class="nav-dot"></span>Rotor PCB</a>
+
+  <span class="nav-section-label">Software</span>
+  <a href="#firmware"><span class="nav-dot"></span>Firmware Architecture</a>
+  <a href="#fluid"><span class="nav-dot"></span>Fluid Simulation</a>
+  <a href="#devenv"><span class="nav-dot"></span>Dev Environment</a>
+
+  <span class="nav-section-label">Reference</span>
+  <a href="#bom"><span class="nav-dot"></span>Full BOM</a>
+
+  <div class="nav-footer">
+    <div class="version">REV — 2026.03</div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════ MAIN -->
+<main>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">Volumetric POV Display</div>
+  <h1>VOL-1<br><span>Design Reference</span></h1>
+  <p class="hero-desc">A spinning persistence-of-vision volumetric display for desk use. Full RGB 12×10 LED matrix at 6000 RPM, wireless inductive power transfer, fluid simulation rendering, and USB-C charging. Medium form factor, custom PCB.</p>
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-val">6000</span><span class="stat-label">RPM target</span></div>
+    <div class="stat"><span class="stat-val">120</span><span class="stat-label">RGB LEDs</span></div>
+    <div class="stat"><span class="stat-val">12×10</span><span class="stat-label">Matrix</span></div>
+    <div class="stat"><span class="stat-val">5W</span><span class="stat-label">Inductive link</span></div>
+    <div class="stat"><span class="stat-val">1500</span><span class="stat-label">mAh battery</span></div>
+    <div class="stat"><span class="stat-val">~90mm</span><span class="stat-label">Rotor height</span></div>
+  </div>
+</div>
+
+<!-- ═══════════ SECTION: OVERVIEW -->
+<section id="overview">
+  <div class="section-header">
+    <span class="section-num">01</span>
+    <h2>System Architecture</h2>
+  </div>
+
+  <div class="arch"><span class="dim">┌─────────────────────────────────────────────────────────────────┐</span>
+<span class="dim">│</span>  <span class="a1">BASE UNIT (Stationary)</span>
+<span class="dim">│</span>
+<span class="dim">│</span>  <span class="a4">USB-C</span> ──► <span class="a1">BQ25895</span> (charger + power path) ──► <span class="a4">LP803450 LiPo</span>
+<span class="dim">│</span>                  │
+<span class="dim">│</span>             3.3V LDO ──► <span class="a1">STM32G031</span> (base MCU)
+<span class="dim">│</span>                              │              │
+<span class="dim">│</span>                    <span class="a2">AO3400 MOSFET</span>      <span class="a2">TCRT5000 IR sensor</span>
+<span class="dim">│</span>                         │              │ (reads reflective tab
+<span class="dim">│</span>                    <span class="a2">RF-300CA motor</span>    │  on rotor underside)
+<span class="dim">│</span>                         │
+<span class="dim">│</span>                  <span class="a3">TX Inductive Coil</span> (5V, Qi 5W)
+<span class="dim">└─────────────────────────┬───────────────────────────────────────┘</span>
+                          <span class="dim">│</span>  <span class="dim">≈ 1–3mm gap, coaxial with shaft</span>
+<span class="dim">┌─────────────────────────▼───────────────────────────────────────┐</span>
+<span class="dim">│</span>  <span class="a2">ROTOR BOARD (Spinning at 6000 RPM)</span>
+<span class="dim">│</span>
+<span class="dim">│</span>  <span class="a3">RX Inductive Coil</span> ──► Rectifier ──► 5V DC
+<span class="dim">│</span>                                          │
+<span class="dim">│</span>                               ┌──────────┴──────────┐
+<span class="dim">│</span>                          <span class="a4">5V rail</span>              <span class="a1">RT9013 LDO</span> → 3.3V
+<span class="dim">│</span>                             │                       │
+<span class="dim">│</span>                    <span class="a1">APA102C ×120</span>         <span class="a1">ESP32-S3-MINI-1</span>
+<span class="dim">│</span>                    (SPI chain)              │         │
+<span class="dim">│</span>                                      <span class="a2">ICM-42688</span>   IR tab
+<span class="dim">│</span>                                        (I2C)    (on PCB edge)
+<span class="dim">└─────────────────────────────────────────────────────────────────┘</span></div>
+
+  <div class="callout callout-info">
+    <strong>Key principle:</strong> Everything safety-critical (motor control, speed PID) lives in the stationary base. The rotor only handles LED output and rendering. These two domains communicate only via the inductive power link and the IR sync signal.
+  </div>
+</section>
+
+<!-- ═══════════ SECTION: IR -->
+<section id="ir">
+  <div class="section-header">
+    <span class="section-num">02</span>
+    <h2>IR Feedback Loop — How It Works</h2>
+  </div>
+
+  <p>The IR circuit is the <strong>angular position encoder</strong> — the heartbeat of the entire display. Without knowing the rotor's angular position, the MCU cannot know which column of the cylindrical display it is currently painting, and the image smears into an unreadable blur.</p>
+
+  <div class="two-col" style="margin-top:24px;">
+    <div class="panel">
+      <h3>Physical Setup</h3>
+      <p>A <strong>TCRT5000 reflective IR sensor</strong> mounts stationary on the base, pointing upward at the underside of the spinning rotor PCB. A small strip of white soldermask (or reflective tape) on the PCB underside acts as the reflector — it passes over the sensor once per revolution, producing a sharp pulse.</p>
+      <p>One tab per revolution = one sync pulse per revolution. That is all that is needed.</p>
+    </div>
+    <div class="panel">
+      <h3>Signal Processing</h3>
+      <p>The TCRT5000 output connects to a GPIO interrupt pin on the <strong>base MCU (STM32G031)</strong>. On each rising edge the MCU records the timestamp using a hardware timer. The period between two successive pulses gives the exact revolution time.</p>
+      <p>RPM = 60 / period_in_seconds. The PID loop uses this computed RPM against the 6000 RPM setpoint to adjust PWM duty cycle on the motor MOSFET.</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Column Timing on the Rotor</h3>
+    <p>At 6000 RPM, one full revolution takes exactly <strong>10ms</strong>. With 12 angular columns, each column's time window is 10ms ÷ 12 = <strong>0.833ms</strong>. The ESP32-S3 uses a hardware timer (not a software loop) to fire an ISR every 0.833ms, advancing the column index from 0 to 11. On each timer tick, the current column's pixel data is burst-sent over SPI to the APA102C chain. The sync pulse resets the column counter to 0 at the start of each revolution.</p>
+
+    <div class="flow" style="margin-top: 16px;">
+      <div class="flow-node accent">IR pulse fires</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">Column = 0<br>Timer reset</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">Timer tick<br>833µs</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">SPI burst<br>column N</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">Column++<br>repeat ×12</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node accent">IR pulse fires<br>again</div>
+    </div>
+  </div>
+
+  <div class="callout callout-warn">
+    <strong>Schmitt trigger note:</strong> Enable the Schmitt trigger on the ESP32-S3 GPIO input that receives the IR signal. Both the ESP32-S3 and STM32 have configurable Schmitt triggers on their GPIO. This turns the analog IR detector output into a clean digital edge with hysteresis, eliminating bounce and false triggers near the threshold. Without it, a noisy IR signal causes double-triggers and image jitter.
+  </div>
+</section>
+
+<!-- ═══════════ SECTION: MOTOR -->
+<section id="motor">
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <h2>Motor &amp; Drive Circuit</h2>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <div class="panel">
+        <h3>Recommended Motor</h3>
+        <table class="spec-table">
+          <tr><td>Part</td><td class="val">RF-300CA-13300</td><td class="note"></td></tr>
+          <tr><td>Type</td><td class="val">Brushed coreless DC</td><td class="note">No ESC needed</td></tr>
+          <tr><td>Rated voltage</td><td class="val">3.7V</td><td class="note">LiPo direct</td></tr>
+          <tr><td>No-load RPM @ 3.7V</td><td class="val">~6000 RPM</td><td class="note">Target speed</td></tr>
+          <tr><td>No-load RPM @ 5V</td><td class="val">~8500 RPM</td><td class="note">PID headroom</td></tr>
+          <tr><td>No-load current</td><td class="val">27–36 mA</td><td class="note">Under load ~80mA</td></tr>
+          <tr><td>Diameter</td><td class="val">24 mm</td><td class="note">Fits base pocket</td></tr>
+          <tr><td>Height</td><td class="val">~12 mm</td><td class="note"></td></tr>
+          <tr><td>Shaft diameter</td><td class="val">2 mm</td><td class="note">File a flat for set screw</td></tr>
+          <tr><td>Weight</td><td class="val">~20 g</td><td class="note"></td></tr>
+          <tr><td>Source</td><td class="val">LCSC / AliExpress</td><td class="note">Buy 5× — they're $0.80 each</td></tr>
+        </table>
+        <div class="callout callout-ok">
+          <strong>Why brushed, not BLDC:</strong> BLDC motors need a 3-phase ESC, adding base board complexity and cost. Brushed motors are PWM-controllable with a single MOSFET. The brush lifetime at 6000 RPM is years of normal desk use — not a practical concern.
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h3>Drive Circuit</h3>
+        <p>A single N-channel MOSFET in a low-side switch topology. No H-bridge needed — the rotor spins one direction only.</p>
+        <table class="spec-table" style="margin-top:12px;">
+          <tr><td>MOSFET</td><td class="val">AO3400</td><td class="note">SOT-23, 4A cont., 3.3V gate drive compatible</td></tr>
+          <tr><td>Flyback diode</td><td class="val">1N4148</td><td class="note">Across motor terminals, cathode to +</td></tr>
+          <tr><td>Gate resistor</td><td class="val">10Ω</td><td class="note">Slows edge, reduces EMI</td></tr>
+          <tr><td>PWM frequency</td><td class="val">20–50 kHz</td><td class="note">Above audible range</td></tr>
+          <tr><td>PWM source</td><td class="val">STM32G031 TIM</td><td class="note">Hardware timer, not software</td></tr>
+        </table>
+      </div>
+
+      <div class="panel" style="margin-top:16px;">
+        <h3>Speed Control PID</h3>
+        <p>The STM32G031 runs a simple PID loop in its IR interrupt handler. Start with P-only during bring-up, then add I-term once the motor's response is characterized.</p>
+        <div class="mono-block">
+<span class="com">// simplified PID in interrupt context</span>
+<span class="hi">float</span> rpm = <span class="hi2">60.0f</span> / period_s;
+<span class="hi">float</span> error = <span class="hi2">6000.0f</span> - rpm;
+integral += error * dt;
+<span class="hi">float</span> duty = Kp*error + Ki*integral;
+duty = <span class="dim">clamp</span>(duty, <span class="hi2">0.0f</span>, <span class="hi2">1.0f</span>);
+<span class="dim">TIM1->CCR1</span> = (<span class="hi">uint16_t</span>)(duty * PWM_PERIOD);
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ SECTION: LEDs -->
+<section id="leds">
+  <div class="section-header">
+    <span class="section-num">04</span>
+    <h2>LED Selection — APA102C (2020)</h2>
+  </div>
+
+  <div class="three-col">
+    <div class="panel-sm">
+      <h3>Why APA102C</h3>
+      <p>Two-wire SPI protocol (CLK + DATA). No timing constraints unlike WS2812B. Can run at up to 20 MHz SPI clock — massively faster than needed, which gives margin for safe operation at 6000 RPM column timing.</p>
+    </div>
+    <div class="panel-sm">
+      <h3>Why 2020 package</h3>
+      <p>2mm × 2mm footprint. Fits 12 LEDs across a 15mm PCB width with comfortable spacing. Lower mass than 3535 or 5050, reducing centrifugal stress on solder joints at high RPM.</p>
+    </div>
+    <div class="panel-sm">
+      <h3>SK9822 Alternative</h3>
+      <p>Drop-in APA102C clone with a faster internal PWM clock (up to 4.7kHz vs APA102's ~440Hz). Slightly less flicker at low brightness. Available on LCSC as a more consistent supply source.</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <table class="spec-table">
+      <tr>
+        <th>Parameter</th>
+        <th>APA102C 2020</th>
+        <th>WS2812B 3535</th>
+        <th>Notes</th>
+      </tr>
+      <tr>
+        <td>Protocol</td>
+        <td class="val">2-wire SPI</td>
+        <td>1-wire timed</td>
+        <td class="note">SPI = no bit-banging, no timing jitter</td>
+      </tr>
+      <tr>
+        <td>Max clock</td>
+        <td class="val">20 MHz</td>
+        <td>800 kHz effective</td>
+        <td class="note">WS2812 bottlenecks at high RPM</td>
+      </tr>
+      <tr>
+        <td>Package</td>
+        <td class="val">2020 (2×2mm)</td>
+        <td>3535 (3.5×3.5mm)</td>
+        <td class="note">Smaller = lighter rotor</td>
+      </tr>
+      <tr>
+        <td>Supply voltage</td>
+        <td class="val">5V</td>
+        <td>5V</td>
+        <td class="note">Fed directly from inductive RX output</td>
+      </tr>
+      <tr>
+        <td>Current @ full white</td>
+        <td class="val">~18 mA</td>
+        <td>~18 mA</td>
+        <td class="note">120 LEDs × 18mA = 2.16A max theoretical</td>
+      </tr>
+      <tr>
+        <td>Typical scene current</td>
+        <td class="val">~350–500 mA</td>
+        <td>—</td>
+        <td class="note">At 20–30% avg brightness (fluid sims)</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="callout callout-warn">
+    <strong>SPI decoupling:</strong> Place 100nF ceramic decoupling capacitors on the 5V supply rail at each group of 4–6 APA102C LEDs on the rotor PCB. At high centrifugal acceleration, supply inductance is effectively increased — decoupling capacitors prevent supply rail droop during simultaneous LED updates.
+  </div>
+</section>
+
+<!-- ═══════════ SECTION: MCU -->
+<section id="mcu">
+  <div class="section-header">
+    <span class="section-num">05</span>
+    <h2>Microcontrollers</h2>
+  </div>
+
+  <div class="two-col">
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+        <h3>Rotor MCU</h3>
+        <span class="badge badge-rotor">ROTOR BOARD</span>
+      </div>
+      <table class="spec-table">
+        <tr><td>Part</td><td class="val">ESP32-S3-MINI-1</td></tr>
+        <tr><td>Architecture</td><td class="val">Xtensa LX7 dual-core</td></tr>
+        <tr><td>Clock</td><td class="val">240 MHz</td></tr>
+        <tr><td>Flash</td><td class="val">4MB (onboard)</td></tr>
+        <tr><td>SRAM</td><td class="val">512 KB</td></tr>
+        <tr><td>Module size</td><td class="val">22 × 18 mm</td></tr>
+        <tr><td>Connectivity</td><td class="val">WiFi + BT 5.0</td></tr>
+        <tr><td>SPI speed</td><td class="val">Up to 80 MHz</td></tr>
+        <tr><td>Operating voltage</td><td class="val">3.3V</td></tr>
+        <tr><td>Active current</td><td class="val">~80–100 mA (WiFi off)</td></tr>
+      </table>
+      <div class="callout callout-info" style="margin-top:14px;">
+        <strong>Core split:</strong> Core 1 handles timing-critical ISRs (IR sync, column timer, SPI output). Core 0 runs FreeRTOS tasks for fluid simulation and framebuffer updates. This separation is why ESP32-S3 is preferred over single-core options.
+      </div>
+    </div>
+
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+        <h3>Base MCU</h3>
+        <span class="badge badge-base">BASE BOARD</span>
+      </div>
+      <table class="spec-table">
+        <tr><td>Part</td><td class="val">STM32G031K8</td></tr>
+        <tr><td>Architecture</td><td class="val">Cortex-M0+</td></tr>
+        <tr><td>Clock</td><td class="val">64 MHz</td></tr>
+        <tr><td>Flash</td><td class="val">64 KB</td></tr>
+        <tr><td>Package</td><td class="val">LQFP-32</td></tr>
+        <tr><td>Timers</td><td class="val">Multiple 16/32-bit</td></tr>
+        <tr><td>I2C</td><td class="val">2× (for BQ25895)</td></tr>
+        <tr><td>PWM</td><td class="val">Hardware TIM output</td></tr>
+        <tr><td>Operating voltage</td><td class="val">3.3V</td></tr>
+        <tr><td>Active current</td><td class="val">~5–10 mA</td></tr>
+      </table>
+      <p style="margin-top:12px;font-size:13px;color:var(--text-dim);">The base MCU has three simple jobs: run the motor speed PID, read the BQ25895 over I2C for battery status, and optionally relay status data. It does not need to be powerful — the STM32G031 is deliberately chosen to be minimal and deterministic.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ SECTION: POWER -->
+<section id="power">
+  <div class="section-header">
+    <span class="section-num">06</span>
+    <h2>Power System</h2>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <div class="panel">
+        <h3>USB-C Charging — BQ25895</h3>
+        <p>The BQ25895 from Texas Instruments is the core of the power system. It handles USB-C input detection, simultaneous charge + system operation (power path), overvoltage and overcurrent protection, and exposes full control over I2C.</p>
+        <table class="spec-table" style="margin-top:12px;">
+          <tr><td>Input voltage</td><td class="val">3.9V – 14V</td><td class="note">USB-C 5V nominal</td></tr>
+          <tr><td>Charge current</td><td class="val">Config via I2C</td><td class="note">Set to 500mA for LP803450</td></tr>
+          <tr><td>Power path</td><td class="val">Yes — NarrowVDC</td><td class="note">System stays on while charging</td></tr>
+          <tr><td>Max sys output</td><td class="val">3A</td><td class="note">More than enough</td></tr>
+          <tr><td>BC1.2 detect</td><td class="val">Yes</td><td class="note">Auto-detects USB charger type</td></tr>
+          <tr><td>Package</td><td class="val">WLCSP-24</td><td class="note">Small but hand-solderable with stencil</td></tr>
+          <tr><td>Interface</td><td class="val">I2C (0x6A)</td><td class="note">Full register control from STM32G031</td></tr>
+        </table>
+        <div class="callout callout-info" style="margin-top:12px;">
+          <strong>Power path behavior:</strong> When USB-C is connected, the system draws from the input directly and the battery charges in background. When USB-C is removed, the BQ25895 switches seamlessly to battery — no glitch, no reset.
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h3>Voltage Rails</h3>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num-col"><div class="step-num">1</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <div class="step-title">USB-C 5V → BQ25895</div>
+              <div class="step-desc">Input rail. BQ25895 handles regulation and distribution from here.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num-col"><div class="step-num">2</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <div class="step-title">BQ25895 SYS → LDO → 3.3V (base logic)</div>
+              <div class="step-desc">XC6210 or RT9013 LDO. Powers STM32G031 and IR sensor circuit.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num-col"><div class="step-num">3</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <div class="step-title">BQ25895 SYS → TPS61023 boost → 5V</div>
+              <div class="step-desc">Stable 5V for inductive TX coil. Boost ensures consistent coupling efficiency regardless of battery voltage sag.</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num-col"><div class="step-num">4</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <div class="step-title">Inductive RX → rectifier → 5V (rotor)</div>
+              <div class="step-desc">Powers APA102C LEDs directly. Also feeds RT9013 LDO for 3.3V (ESP32-S3 + IMU).</div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num-col"><div class="step-num">5</div><div class="step-line"></div></div>
+            <div class="step-body">
+              <div class="step-title">Motor drive from BQ25895 SYS rail</div>
+              <div class="step-desc">Motor fed directly via AO3400 MOSFET. No separate regulation — PID compensates for voltage variation.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Power Budget</h3>
+    <div class="power-row"><span class="power-label">Motor (RF-300CA, loaded)</span><span class="power-val">~80 mA</span><div class="power-bar"><div class="power-fill" style="width:8%"></div></div></div>
+    <div class="power-row"><span class="power-label">STM32G031 + IR circuit (base)</span><span class="power-val">~15 mA</span><div class="power-bar"><div class="power-fill" style="width:2%"></div></div></div>
+    <div class="power-row"><span class="power-label">BQ25895 quiescent</span><span class="power-val">~5 mA</span><div class="power-bar"><div class="power-fill" style="width:1%"></div></div></div>
+    <div class="power-row"><span class="power-label">Boost converter (TPS61023) quiescent</span><span class="power-val">~10 mA</span><div class="power-bar"><div class="power-fill" style="width:1%"></div></div></div>
+    <div class="power-row"><span class="power-label">Inductive transfer (5W, 72% eff) → ESP32-S3</span><span class="power-val">~100 mA</span><div class="power-bar"><div class="power-fill" style="width:10%"></div></div></div>
+    <div class="power-row"><span class="power-label">APA102C ×120 @ 25% avg brightness</span><span class="power-val">~540 mA</span><div class="power-bar"><div class="power-fill" style="width:56%"></div></div></div>
+    <div class="power-row"><span class="power-label">ICM-42688-P IMU</span><span class="power-val">~3 mA</span><div class="power-bar"><div class="power-fill" style="width:0%"></div></div></div>
+    <div class="power-total">
+      <span class="label">Total draw from battery (typ)</span>
+      <span class="total-val">~960 mA → ~1A</span>
+    </div>
+  </div>
+
+  <div class="callout callout-ok">
+    <strong>Runtime estimate:</strong> LP803450 at 1500mAh ÷ 1A draw = <strong>~1.5 hours</strong> unplugged. With USB-C connected, runtime is indefinite. Reducing LED brightness to 15% average drops total draw to ~600mA for ~2.5 hours runtime.
+  </div>
+</section>
+
+<!-- ═══════════ SECTION: BATTERY -->
+<section id="battery">
+  <div class="section-header">
+    <span class="section-num">07</span>
+    <h2>Battery — LP803450</h2>
+  </div>
+
+  <div class="two-col">
+    <div class="panel">
+      <h3>Recommended Cell</h3>
+      <table class="spec-table">
+        <tr><td>Model</td><td class="val">LP803450</td><td class="note">Flat LiPo pouch</td></tr>
+        <tr><td>Capacity</td><td class="val">1500 mAh</td><td class="note">1.9–2.0Wh practical</td></tr>
+        <tr><td>Nominal voltage</td><td class="val">3.7V</td><td class="note">4.2V fully charged</td></tr>
+        <tr><td>Max charge voltage</td><td class="val">4.2V ± 50mV</td><td class="note">BQ25895 manages this</td></tr>
+        <tr><td>Dimensions</td><td class="val">8 × 34 × 50 mm</td><td class="note">Fits in 60mm base</td></tr>
+        <tr><td>Weight</td><td class="val">~27–28 g</td><td class="note"></td></tr>
+        <tr><td>Cont. discharge</td><td class="val">1.5A (1C)</td><td class="note">Our draw is ~1A, comfortable</td></tr>
+        <tr><td>Cycle life</td><td class="val">300–500 cycles</td><td class="note">At full charge/discharge</td></tr>
+        <tr><td>Connector</td><td class="val">JST-PH 2.0mm 2-pin</td><td class="note">Standard hobby LiPo</td></tr>
+        <tr><td>Charge rate</td><td class="val">500mA (0.33C)</td><td class="note">Conservative, extends cycle life</td></tr>
+        <tr><td>Charge time</td><td class="val">~3 hours</td><td class="note">From fully depleted</td></tr>
+        <tr><td>Sources</td><td class="val">Adafruit #354, LCSC, AliExpress</td><td class="note"></td></tr>
+      </table>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h3>Why This Form Factor</h3>
+        <p>The LP803450 is <strong>8mm thick</strong> — this is the critical dimension. The base interior has roughly 25–30mm of height after the motor, PCB, and coil are accounted for. A flat LiPo lying horizontal consumes only 8mm of that. An 18650 cylindrical cell would need to stand upright (65mm tall, exceeds budget) or lie on its side (18mm diameter, fights the motor pocket).</p>
+        <p style="margin-top:10px;">Going above 1500mAh pushes you into physically larger cells (LP804050 = 8×40×50mm, still manageable, ~2000mAh) without meaningful design changes. Going below 1000mAh results in under 1 hour runtime at full brightness — uncomfortable for a display you want to run passively.</p>
+      </div>
+      <div class="panel" style="margin-top:16px;">
+        <h3>PCM / Protection Note</h3>
+        <div class="callout callout-info">
+          <strong>Do not double-protect.</strong> The BQ25895 handles all overvoltage, undervoltage, and overcurrent protection at the system level. Source a bare pouch cell without built-in PCM if possible. If the cell comes with a PCM (as Adafruit's do), it is still fine — just note the PCM's 2.75V cutoff may trigger before the BQ25895 threshold under some edge cases.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ SECTION: INDUCTIVE -->
+<section id="inductive">
+  <div class="section-header">
+    <span class="section-num">08</span>
+    <h2>Inductive Power Transfer</h2>
+  </div>
+
+  <div class="two-col">
+    <div class="panel">
+      <h3>Why Inductive (vs Slip Rings)</h3>
+      <p>Slip rings provide reliable electrical contact through rotating interfaces, but they add mechanical friction, wear over time, generate sparks under load, and require precise alignment. At 6000 RPM, even a small amount of wear debris can cause signal noise in the IR feedback circuit.</p>
+      <p>Inductive transfer using a Qi-compatible 5W coil set is frictionless, wear-free, and rotationally symmetric — coupling is constant throughout the revolution since both coils share the same rotational axis.</p>
+    </div>
+    <div class="panel">
+      <h3>Coil Configuration</h3>
+      <table class="spec-table">
+        <tr><td>Standard</td><td class="val">Qi 5W compatible</td></tr>
+        <tr><td>TX coil location</td><td class="val">Base top face, flush-mounted</td></tr>
+        <tr><td>RX coil location</td><td class="val">Rotor shaft base, bottom of PCB</td></tr>
+        <tr><td>Gap</td><td class="val">1–3 mm coaxial</td></tr>
+        <tr><td>Efficiency</td><td class="val">~70–75%</td></tr>
+        <tr><td>TX voltage</td><td class="val">5V (from TPS61023 boost)</td></tr>
+        <tr><td>RX output</td><td class="val">5V DC after rectifier</td></tr>
+        <tr><td>Max power</td><td class="val">5W (~1A at 5V)</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="callout callout-warn">
+    <strong>Gap is critical.</strong> Qi coil efficiency drops sharply beyond 3mm gap. Design the motor shaft adapter such that the RX coil sits 1–2mm above the base top surface when the rotor is seated. Prototype the coil alignment before committing to the final enclosure geometry.
+  </div>
+</section>
+
+<!-- ═══════════ SECTION: IMU -->
+<section id="imu">
+  <div class="section-header">
+    <span class="section-num">09</span>
+    <h2>IMU — ICM-42688-P</h2>
+  </div>
+
+  <div class="two-col">
+    <div class="panel">
+      <h3>Specifications</h3>
+      <table class="spec-table">
+        <tr><td>Part</td><td class="val">ICM-42688-P</td></tr>
+        <tr><td>Axes</td><td class="val">6-axis (accel + gyro)</td></tr>
+        <tr><td>Interface</td><td class="val">SPI or I2C</td></tr>
+        <tr><td>Package</td><td class="val">LGA-14 (2.5 × 3mm)</td></tr>
+        <tr><td>Gyro range</td><td class="val">±2000 °/s</td></tr>
+        <tr><td>Accel range</td><td class="val">±16g</td></tr>
+        <tr><td>Supply</td><td class="val">1.71V – 3.6V (3.3V)</td></tr>
+        <tr><td>Current</td><td class="val">~3 mA active</td></tr>
+      </table>
+    </div>
+    <div class="panel">
+      <h3>Important Limitation</h3>
+      <div class="callout callout-crit">
+        <strong>The IMU cannot measure spin rate.</strong> 6000 RPM = 100 rev/s = 36,000 °/s. This far exceeds the ICM-42688's ±2000 °/s gyro range — the gyro will saturate instantly during operation. Motor speed feedback is the IR sensor's job exclusively.
+      </div>
+      <h3 style="margin-top:16px;">What the IMU Actually Does</h3>
+      <p>While the gyro saturates during spin, the <strong>accelerometer</strong> remains useful. It measures the unit's tilt relative to gravity when the display is placed at an angle. The render task reads tilt data and can rotate the displayed scene to appear upright regardless of how the unit is sitting. Secondary use: vibration anomaly detection when the display is stationary (imbalance diagnostics). Tertiary: wake/sleep gesture detection.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ SECTION: ENCLOSURE -->
+<section id="enclosure">
+  <div class="section-header">
+    <span class="section-num">10</span>
+    <h2>Enclosure Design</h2>
+  </div>
+
+  <div class="three-col">
+    <div class="panel-sm">
+      <h3>Base Unit</h3>
+      <p>Solid 3D-printed cylinder, <strong>60mm OD × 40mm tall</strong>. Print in <strong>PETG or ABS</strong> — not PLA, which softens at ~60°C and is unsuitable near the motor. The motor mounts vertically at center in a <strong>24.5mm pocket</strong> (0.5mm clearance), held by friction + epoxy bead on outer circumference after alignment. Battery, base PCB, and USB-C connector ring the motor pocket. USB-C breaks out through the sidewall. The Qi TX coil mounts flush into the top face.</p>
+    </div>
+    <div class="panel-sm">
+      <h3>Rotor Shaft Adapter</h3>
+      <p>A small 3D-printed hub clamps onto the motor's 2mm shaft. Design as a <strong>collet-style clamp with an M1.6 set screw</strong> pressing against a flat filed onto the motor shaft. At 6000 RPM, any shaft looseness causes catastrophic wobble. Apply threadlocker to the set screw after final alignment. The rotor PCB attaches vertically to this hub through a center hole, standing upright like a blade.</p>
+    </div>
+    <div class="panel-sm">
+      <h3>Dome (Display Guard)</h3>
+      <p>Clear <strong>frosted acrylic tube, 50–55mm ID, 3mm wall, ~90mm tall</strong>. Press-fits or snap-fits into a recess on the base top. Frosting scatters LED output laterally, smoothing the POV effect. Clear acrylic gives a harsher stroboscopic look. Leave the dome top open for thermal management — the motor and LEDs generate heat and a sealed dome traps it. Source as laser-cut tube from any acrylic supplier.</p>
+    </div>
+  </div>
+
+  <div class="two-col" style="margin-top:4px;">
+    <div class="panel">
+      <h3>Balance — Critical</h3>
+      <p>At 6000 RPM, a 1g mass imbalance at 30mm radius produces centrifugal force of about <strong>1.8N</strong>. This causes vibration, noise, bearing wear, and image jitter. The rotor PCB must be balanced around the rotation axis.</p>
+      <p>Design the PCB such that components are distributed symmetrically left-right. If the LED face is heavier than the back, add a <strong>copper pour counterweight</strong> on the opposite face. After assembly, check balance by spinning slowly by hand in a still room — any wobble is visible and must be corrected before running at full speed.</p>
+    </div>
+    <div class="panel">
+      <h3>IR Sensor Placement</h3>
+      <p>The TCRT5000 mounts in a small pocket in the inner top surface of the base, pointing upward at the rotor PCB underside. Position it at the rotor's radial center (directly below the shaft center) or at any consistent radial position — the reflective tab on the PCB underside passes over it once per revolution.</p>
+      <p>The reflective tab is simply white soldermask exposed on the rotor PCB underside, or a 5×5mm piece of chrome tape. Ensure the rest of the PCB underside has no other highly reflective patches that could trigger false pulses.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ SECTION: ROTOR PCB -->
+<section id="rotor-pcb">
+  <div class="section-header">
+    <span class="section-num">11</span>
+    <h2>Rotor PCB Design</h2>
+  </div>
+
+  <div class="panel">
+    <h3>Board Geometry</h3>
+    <table class="spec-table">
+      <tr><td>Dimensions</td><td class="val">15mm × 85mm</td><td class="note">Fits inside 55mm ID dome with clearance</td></tr>
+      <tr><td>Layer count</td><td class="val">2-layer</td><td class="note">Standard JLC process, sufficient for this design</td></tr>
+      <tr><td>LED placement</td><td class="val">Front face only</td><td class="note">12 columns × 10 rows = 120 APA102C</td></tr>
+      <tr><td>Column spacing</td><td class="val">~1.25mm</td><td class="note">15mm ÷ 12 columns</td></tr>
+      <tr><td>Row spacing</td><td class="val">~8.5mm</td><td class="note">85mm ÷ 10 rows</td></tr>
+      <tr><td>ESP32-S3 placement</td><td class="val">Back face, center mass</td><td class="note">Helps balance</td></tr>
+      <tr><td>IMU placement</td><td class="val">Back face</td><td class="note">ICM-42688 near center of rotation</td></tr>
+      <tr><td>Center hole</td><td class="val">2.2mm diameter</td><td class="note">Motor shaft pass-through</td></tr>
+      <tr><td>Copper clearance around center hole</td><td class="val">≥ 2mm</td><td class="note">DRC rule — prevents cracking under vibration</td></tr>
+    </table>
+  </div>
+
+  <div class="callout callout-warn">
+    <strong>KiCad DRC rule to add:</strong> Create a custom DRC rule that flags any copper (tracks, fills, pads) within 2mm of the center mounting hole. Vibration stress concentrates at the hole boundary and cracks traces there first.
+  </div>
+
+  <div class="two-col" style="margin-top:4px;">
+    <div class="panel">
+      <h3>SPI Chain Topology</h3>
+      <p>All 120 APA102C LEDs are wired in a single daisy-chain: CLK and DATA connect in series through each LED, from the ESP32-S3's SPI MOSI/CLK outputs to LED 1, then LED 1 output to LED 2, and so on through LED 120. The SPI chain terminates with no pull-up needed — APA102C handles this internally.</p>
+      <p>Arrange the chain order in the firmware to match your physical column/row layout. Row-major ordering (all 12 LEDs in row 0 first, then row 1, etc.) is the most intuitive for framebuffer indexing.</p>
+    </div>
+    <div class="panel">
+      <h3>Power Routing</h3>
+      <p>5V and GND should be routed as wide pours on separate layers — at 500–700mA, resistance in thin traces causes measurable voltage drop across 85mm of board length. Target ≤0.1V drop at max current. At 35µm copper, a 2mm-wide trace has about 15mΩ/cm — across 8.5cm that's ~130mΩ, producing ~90mV drop at 700mA. Widen to 3mm on 5V pour or use both layers in parallel for the power rail.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ SECTION: FIRMWARE -->
+<section id="firmware">
+  <div class="section-header">
+    <span class="section-num">12</span>
+    <h2>Firmware Architecture</h2>
+  </div>
+
+  <div class="callout callout-info">
+    The firmware has two completely independent domains: the <strong>base MCU firmware</strong> (STM32G031, interrupt-driven C, no RTOS) and the <strong>rotor MCU firmware</strong> (ESP32-S3, FreeRTOS, two cores). They share no code and communicate only via the IR sync signal and optionally a UART link.
+  </div>
+
+  <div class="two-col" style="margin-top: 20px;">
+    <div class="panel">
+      <h3>Base Firmware (STM32G031)</h3>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num-col"><div class="step-num">1</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <div class="step-title">Boot — init peripherals</div>
+            <div class="step-desc">Configure TIM1 for PWM output to motor MOSFET, TIM2 as free-running counter for IR period measurement, GPIO interrupt on IR sensor pin, I2C1 for BQ25895.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num-col"><div class="step-num">2</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <div class="step-title">IR interrupt handler</div>
+            <div class="step-desc">On each rising edge, read TIM2 counter, compute period delta, calculate RPM, run PID update, write new duty cycle to TIM1 CCR. Reset TIM2 counter. Entire handler runs in &lt;5µs.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num-col"><div class="step-num">3</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <div class="step-title">Main loop — BQ25895 polling</div>
+            <div class="step-desc">Every 5 seconds, read charge status and battery voltage over I2C. Store values. Optionally transmit over UART for debugging. If battery &lt;3.3V, reduce motor PWM cap.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num-col"><div class="step-num">4</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <div class="step-title">Soft start ramp</div>
+            <div class="step-desc">On power-on, PID setpoint ramps from 0 to 6000 RPM over 3 seconds. Prevents current surge and mechanical shock to the rotor assembly.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Rotor Firmware (ESP32-S3)</h3>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num-col"><div class="step-num">1</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <div class="step-title">Boot — Core 1 init</div>
+            <div class="step-desc">Initialize SPI peripheral (MOSI + CLK to APA102C chain). Configure hardware timer for column timing. Set up GPIO interrupt for IR sync pulse input. Blank all 120 LEDs.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num-col"><div class="step-num">2</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <div class="step-title">IR sync ISR (Core 1)</div>
+            <div class="step-desc">Reset column counter to 0. Measure inter-pulse period for accurate column timing interval. Reload hardware timer. Increment revolution counter.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num-col"><div class="step-num">3</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <div class="step-title">Column timer ISR (Core 1)</div>
+            <div class="step-desc">Fire every period/12 µs. Read framebuffer[col][0..9], serialize to APA102C format, burst over SPI. Increment col. If col == 12, col = 0. Total SPI time per column: &lt;200µs at 1MHz SPI, far within 833µs budget.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num-col"><div class="step-num">4</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <div class="step-title">Render task (Core 0, high priority)</div>
+            <div class="step-desc">Projects 3D scene (shapes or fluid grid) into cylindrical framebuffer. Runs at 60Hz. Takes mutex on framebuffer, writes new pixel values, releases mutex. Column ISR takes same mutex to read.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num-col"><div class="step-num">5</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <div class="step-title">Fluid sim task (Core 0, normal priority)</div>
+            <div class="step-desc">Runs Navier-Stokes solver on 12×10 grid at 30–60Hz. Updates sim buffer. Render task reads from sim buffer each frame. Double-buffering prevents tearing.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num-col"><div class="step-num">6</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <div class="step-title">IMU task (Core 0, low priority)</div>
+            <div class="step-desc">Reads ICM-42688 accelerometer over I2C at 10Hz. Computes tilt angle. Updates a global orientation variable that the render task uses to adjust scene rotation.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ SECTION: FLUID SIM -->
+<section id="fluid">
+  <div class="section-header">
+    <span class="section-num">13</span>
+    <h2>Fluid Simulation — Jos Stam Method</h2>
+  </div>
+
+  <p>The fluid simulation runs on a <strong>12×10 grid</strong> matching the cylindrical display dimensions. Each cell has a velocity field (vx, vy) and a density value. Density maps to LED color and brightness.</p>
+
+  <div class="two-col" style="margin-top:20px;">
+    <div class="panel">
+      <h3>Algorithm Steps (per frame)</h3>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num-col"><div class="step-num">1</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <div class="step-title">Add sources</div>
+            <div class="step-desc">Inject density and velocity at seed points. For a night-light feel, add a slow upward velocity bias and periodic density pulses at the bottom row.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num-col"><div class="step-num">2</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <div class="step-title">Diffuse velocity</div>
+            <div class="step-desc">Spread velocity field using Gauss-Seidel iteration (2–4 iterations sufficient at 12×10 resolution). Controls fluid viscosity.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num-col"><div class="step-num">3</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <div class="step-title">Project velocity</div>
+            <div class="step-desc">Enforce incompressibility — make the velocity field mass-conserving. Another Gauss-Seidel solve. Prevents density accumulation in corners.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num-col"><div class="step-num">4</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <div class="step-title">Advect velocity + density</div>
+            <div class="step-desc">Move density along velocity field using bilinear interpolation (stable semi-Lagrangian advection). This is the main "flow" step.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num-col"><div class="step-num">5</div><div class="step-line"></div></div>
+          <div class="step-body">
+            <div class="step-title">Map to pixels</div>
+            <div class="step-desc">Each grid cell's density value is mapped through a color gradient (e.g. blue→cyan→white for a cool fluid, red→orange→yellow for a flame) and written to the framebuffer.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Python Prototype First</h3>
+      <p>Before implementing on the ESP32-S3, prototype the fluid sim in Python with numpy and matplotlib. A 12×10 grid runs in milliseconds — you can tune viscosity, diffusion rate, source positions, and color mapping interactively before writing a single line of C.</p>
+      <div class="mono-block">
+<span class="com"># rough prototype structure</span>
+<span class="hi">import</span> numpy <span class="hi">as</span> np
+
+N, M = <span class="hi2">12</span>, <span class="hi2">10</span>  <span class="com"># cols, rows</span>
+density = np.zeros((N, M))
+vx      = np.zeros((N, M))
+vy      = np.zeros((N, M))
+
+<span class="hi">def</span> <span class="hi2">step</span>(dt, visc, diff):
+    add_sources(density, vx, vy)
+    diffuse(vx, visc, dt)
+    diffuse(vy, visc, dt)
+    project(vx, vy)
+    advect(density, vx, vy, dt)
+    map_to_rgb(density)  <span class="com"># → framebuffer</span>
+      </div>
+      <p style="margin-top:12px;font-size:13px;color:var(--text-dim);">Port to C once the behavior looks right in Python. The algorithm is identical — replace numpy operations with nested for-loops over your 12×10 arrays.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ SECTION: DEV ENV -->
+<section id="devenv">
+  <div class="section-header">
+    <span class="section-num">14</span>
+    <h2>Development Environment</h2>
+  </div>
+
+  <div class="panel-grid">
+    <div class="panel-sm">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <h3>ESP-IDF (Rotor)</h3>
+        <span class="badge badge-rotor">ESP32-S3</span>
+      </div>
+      <p>Install <strong>ESP-IDF v5.x</strong> (native Espressif framework, not Arduino-ESP32). On Arch:</p>
+      <div class="mono-block">
+<span class="dim">$ </span><span class="hi">yay</span> -S esp-idf
+<span class="dim">$ </span><span class="hi">source</span> /opt/esp-idf/export.sh
+<span class="dim"># add to .bashrc or a project shell script</span>
+      </div>
+      <p style="margin-top:8px;font-size:13px;">Use <strong>clangd</strong> for LSP — run <code>idf.py set-target esp32s3</code> first to generate <code>compile_commands.json</code>. Flash with:</p>
+      <div class="mono-block"><span class="dim">$ </span><span class="hi">idf.py</span> -p /dev/ttyUSB0 flash monitor</div>
+      <div class="callout callout-warn" style="margin-top:10px;font-size:12.5px;">
+        <strong>uucp group:</strong> <code>sudo usermod -aG uucp $USER</code> for serial port access on Arch.
+      </div>
+    </div>
+
+    <div class="panel-sm">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <h3>STM32CubeMX + GCC (Base)</h3>
+        <span class="badge badge-base">STM32G031</span>
+      </div>
+      <p>Use <strong>STM32CubeMX</strong> for peripheral init code generation (.ioc file), then a CMake build. Flash and debug via <strong>ST-Link V2</strong>.</p>
+      <div class="mono-block">
+<span class="dim">$ </span><span class="hi">sudo pacman</span> -S arm-none-eabi-gcc openocd
+<span class="dim">$ </span><span class="hi">yay</span> -S stm32cubemx
+<span class="dim"># flash via openocd:</span>
+<span class="dim">$ </span><span class="hi">openocd</span> -f interface/stlink.cfg \
+  -f target/stm32g0x.cfg \
+  -c <span class="hi2">"program build/main.elf verify reset exit"</span>
+      </div>
+    </div>
+
+    <div class="panel-sm">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <h3>KiCad 8 (PCB)</h3>
+        <span class="badge badge-mech">PCB Design</span>
+      </div>
+      <div class="mono-block"><span class="dim">$ </span><span class="hi">sudo pacman</span> -S kicad kicad-library</div>
+      <p style="margin-top:10px;font-size:13px;">Add these footprint libraries:</p>
+      <p style="font-size:13px;">• Espressif KiCad Library (GitHub: espressif/kicad-libraries) — for ESP32-S3-MINI-1 module footprint</p>
+      <p style="font-size:13px;">• ICM-42688-P is in standard KiCad library</p>
+      <p style="font-size:13px;">• APA102C 2020 footprint — create manually or grab from SnapEDA</p>
+      <p style="font-size:13px;">Order from JLCPCB 2-layer standard process. Under $5 for 5 boards.</p>
+    </div>
+
+    <div class="panel-sm">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <h3>FreeCAD 1.0 (Enclosure)</h3>
+        <span class="badge badge-mech">Mechanical</span>
+      </div>
+      <div class="mono-block"><span class="dim">$ </span><span class="hi">sudo pacman</span> -S freecad</div>
+      <p style="margin-top:10px;font-size:13px;">Design the base and dome adapter as parametric models. Key dims to parameterize: motor pocket diameter, PCB slot width, USB-C cutout, dome recess.</p>
+      <div class="callout callout-ok" style="margin-top:10px;font-size:12.5px;">
+        <strong>Print motor pocket first</strong> as a standalone test print before committing to the full base geometry. Verify press-fit before the full print.
+      </div>
+    </div>
+
+    <div class="panel-sm">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <h3>Python (Fluid Sim Prototype)</h3>
+        <span class="badge badge-shared">Simulation</span>
+      </div>
+      <div class="mono-block">
+<span class="dim">$ </span><span class="hi">pip</span> install numpy matplotlib --break-system-packages
+      </div>
+      <p style="margin-top:10px;font-size:13px;">Prototype the full Navier-Stokes fluid solver in Python first. Visualize with <code>matplotlib.imshow()</code> at 12×10 resolution. Tune viscosity, diffusion, color gradients, source positions — then port to C for the ESP-IDF build.</p>
+    </div>
+
+    <div class="panel-sm">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <h3>Git Repo Structure</h3>
+        <span class="badge badge-shared">Project</span>
+      </div>
+      <div class="mono-block">
+<span class="hi">vol-1/</span>
+├── <span class="hi2">firmware/</span>
+│   ├── <span class="dim">rotor/</span>     <span class="com"># ESP-IDF project</span>
+│   └── <span class="dim">base/</span>      <span class="com"># STM32 CMake project</span>
+├── <span class="hi2">hardware/</span>
+│   ├── <span class="dim">rotor-pcb/</span> <span class="com"># KiCad</span>
+│   └── <span class="dim">base-pcb/</span>  <span class="com"># KiCad</span>
+├── <span class="hi2">mechanical/</span>
+│   └── <span class="dim">freecad/</span>   <span class="com"># base + adapter</span>
+└── <span class="hi2">simulation/</span>
+    └── <span class="dim">fluid.py</span>   <span class="com"># prototype</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ SECTION: BOM -->
+<section id="bom">
+  <div class="section-header">
+    <span class="section-num">15</span>
+    <h2>Full Bill of Materials</h2>
+  </div>
+
+  <table class="bom-table">
+    <thead>
+      <tr>
+        <th>Part / Model</th>
+        <th>Function</th>
+        <th>Board</th>
+        <th>Package</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="part-name">ESP32-S3-MINI-1</span></td>
+        <td>Rotor MCU — rendering, LED drive</td>
+        <td><span class="badge badge-rotor">Rotor</span></td>
+        <td>Module 22×18mm</td>
+        <td>Dual-core 240MHz, SPI, WiFi/BT for v2</td>
+      </tr>
+      <tr>
+        <td><span class="part-name">APA102C (×120)</span></td>
+        <td>RGB LEDs — 12×10 matrix</td>
+        <td><span class="badge badge-rotor">Rotor</span></td>
+        <td>2020 (2×2mm)</td>
+        <td>SPI protocol, no timing constraints. SK9822 is drop-in alternative</td>
+      </tr>
+      <tr>
+        <td><span class="part-name">ICM-42688-P</span></td>
+        <td>6-axis IMU — tilt / orientation</td>
+        <td><span class="badge badge-rotor">Rotor</span></td>
+        <td>LGA-14 (2.5×3mm)</td>
+        <td>I2C to ESP32-S3. Cannot measure spin rate (saturates at ±2000°/s)</td>
+      </tr>
+      <tr>
+        <td><span class="part-name">RT9013-33</span></td>
+        <td>3.3V LDO — rotor logic rail</td>
+        <td><span class="badge badge-rotor">Rotor</span></td>
+        <td>SOT-23-5</td>
+        <td>Powers ESP32-S3 + IMU from 5V inductive RX output</td>
+      </tr>
+      <tr>
+        <td><span class="part-name">Qi 5W RX Coil Module</span></td>
+        <td>Inductive power receive</td>
+        <td><span class="badge badge-rotor">Rotor</span></td>
+        <td>Coil module</td>
+        <td>Mounts at rotor base, 1–3mm above TX coil</td>
+      </tr>
+      <tr>
+        <td><span class="part-name">STM32G031K8</span></td>
+        <td>Base MCU — motor PID, BQ25895 I2C</td>
+        <td><span class="badge badge-base">Base</span></td>
+        <td>LQFP-32</td>
+        <td>Cortex-M0+, 64MHz. Flash via ST-Link V2</td>
+      </tr>
+      <tr>
+        <td><span class="part-name">BQ25895</span></td>
+        <td>USB-C charger + power path IC</td>
+        <td><span class="badge badge-base">Base</span></td>
+        <td>WLCSP-24</td>
+        <td>Charge while operating, I2C control, BC1.2 detect</td>
+      </tr>
+      <tr>
+        <td><span class="part-name">RF-300CA-13300</span></td>
+        <td>Brushed DC motor</td>
+        <td><span class="badge badge-base">Base</span></td>
+        <td>24mm cylinder</td>
+        <td>~6000 RPM @ 3.7V. Buy 5×. Source: LCSC / AliExpress</td>
+      </tr>
+      <tr>
+        <td><span class="part-name">AO3400</span></td>
+        <td>N-MOSFET — motor PWM switch</td>
+        <td><span class="badge badge-base">Base</span></td>
+        <td>SOT-23</td>
+        <td>4A continuous, 3.3V gate drive compatible</td>
+      </tr>
+      <tr>
+        <td><span class="part-name">TCRT5000</span></td>
+        <td>Reflective IR sensor — angular position</td>
+        <td><span class="badge badge-base">Base</span></td>
+        <td>SMD or THT</td>
+        <td>Points up at rotor underside. One pulse per revolution</td>
+      </tr>
+      <tr>
+        <td><span class="part-name">TPS61023</span></td>
+        <td>Boost converter — 5V for inductive TX</td>
+        <td><span class="badge badge-base">Base</span></td>
+        <td>SOT-23-6</td>
+        <td>Stable 5V from varying battery voltage</td>
+      </tr>
+      <tr>
+        <td><span class="part-name">Qi 5W TX Coil Module</span></td>
+        <td>Inductive power transmit</td>
+        <td><span class="badge badge-base">Base</span></td>
+        <td>Coil module</td>
+        <td>Flush-mounted into base top face</td>
+      </tr>
+      <tr>
+        <td><span class="part-name">LP803450 LiPo</span></td>
+        <td>3.7V 1500mAh battery</td>
+        <td><span class="badge badge-base">Base</span></td>
+        <td>8×34×50mm flat pouch</td>
+        <td>~1.5hr runtime. JST-PH 2-pin. Adafruit #354 or LCSC</td>
+      </tr>
+      <tr>
+        <td><span class="part-name">XC6210 / RT9013 (base)</span></td>
+        <td>3.3V LDO — base logic rail</td>
+        <td><span class="badge badge-base">Base</span></td>
+        <td>SOT-23-5</td>
+        <td>Powers STM32G031 from BQ25895 SYS output</td>
+      </tr>
+      <tr>
+        <td><span class="part-name">1N4148</span></td>
+        <td>Flyback diode — motor</td>
+        <td><span class="badge badge-base">Base</span></td>
+        <td>SOD-123 SMD</td>
+        <td>Across motor terminals, cathode to positive rail</td>
+      </tr>
+      <tr>
+        <td><span class="part-name">USB-C Receptacle (16-pin)</span></td>
+        <td>USB-C input connector</td>
+        <td><span class="badge badge-base">Base</span></td>
+        <td>SMD</td>
+        <td>Route VBUS to BQ25895 VBUS pin, D+/D- to BC1.2 detect pins</td>
+      </tr>
+      <tr>
+        <td><span class="part-name">Acrylic tube</span></td>
+        <td>Dome / display guard</td>
+        <td><span class="badge badge-mech">Mech</span></td>
+        <td>50–55mm ID, 3mm wall, 90mm tall</td>
+        <td>Frosted preferred. Press-fits into base recess</td>
+      </tr>
+      <tr>
+        <td><span class="part-name">PETG filament</span></td>
+        <td>Base + rotor shaft adapter</td>
+        <td><span class="badge badge-mech">Mech</span></td>
+        <td>FDM print</td>
+        <td>Do not use PLA (softens near motor heat)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-ok">
+    <strong>Order of operations recommendation:</strong> Order PCBs from JLCPCB first (5–7 day lead time). While waiting, prototype the motor pocket print, verify fit, and breadboard the base power circuit (BQ25895 + battery + USB-C + LDO). When PCBs arrive, assemble rotor board first, verify LED chain before mounting to motor.
+  </div>
+</section>
+
+<!-- FOOTER -->
+<div style="padding: 40px 60px; border-top: 1px solid var(--border); display:flex; justify-content:space-between; align-items:center; background: var(--bg2);">
+  <div>
+    <div style="font-family: var(--display); font-weight:700; font-size:16px; color:var(--text-bright);">VOL-1 Design Reference</div>
+    <div style="font-family: var(--mono); font-size:11px; color:var(--text-dim); margin-top:4px; letter-spacing:0.1em;">REV 1.0 — 2026.03 — Pixxel EPS / Mak</div>
+  </div>
+  <div style="font-family: var(--mono); font-size:11px; color:var(--text-dim); text-align:right;">
+    <div>ESP32-S3 + STM32G031</div>
+    <div>APA102C × 120 | RF-300CA | LP803450</div>
+  </div>
+</div>
+
+</main>
+
+</body>
+</html>
