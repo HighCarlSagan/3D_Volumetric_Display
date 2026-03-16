@@ -50,4 +50,9 @@ Thumbs.db
 
 # Temporary files
 tmp/
-temp/
+temp/# KiCad lock files
+*.lck
+# KiCad backups
+*-backups/
+*.kicad_sch-bak
+*.kicad_pcb-bak
