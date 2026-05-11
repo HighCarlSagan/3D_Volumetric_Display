@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VOL-1 — Volumetric POV Display / Build Roadmap · rev B</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Fraunces:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0e0b;
+    --bg-panel: #141612;
+    --ink: #d4d0c4;
+    --ink-dim: #7a7568;
+    --ink-faint: #45423a;
+    --accent: #d4a24c;
+    --accent-warm: #e67e3c;
+    --accent-cool: #7ba87a;
+    --accent-cyan: #6fb5c9;
+    --accent-rose: #c97a7a;
+    --grid: #1a1c17;
+    --rule: #2a2c25;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--ink); }
+  body {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    background-image:
+      linear-gradient(rgba(212,162,76,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(212,162,76,0.015) 1px, transparent 1px);
+    background-size: 24px 24px;
+    padding: 40px 20px 80px;
+  }
+  .page {
+    max-width: 1040px;
+    margin: 0 auto;
+    background: var(--bg-panel);
+    border: 1px solid var(--rule);
+    box-shadow: 0 0 0 1px rgba(212,162,76,0.05), 0 30px 60px -20px rgba(0,0,0,0.6);
+  }
+  header.masthead {
+    padding: 32px 36px 20px;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .doc-id {
+    font-size: 10px;
+    letter-spacing: 2.4px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 32px;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+    color: var(--ink);
+  }
+  h1 em {
+    color: var(--accent-warm);
+    font-style: italic;
+    font-weight: 400;
+  }
+  .meta-block {
+    text-align: right;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    line-height: 1.8;
+  }
+  .rev-stamp {
+    display: inline-block;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 2px 8px;
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+  .tagline {
+    padding: 14px 36px;
+    font-size: 12px;
+    color: var(--ink-dim);
+    font-style: italic;
+    font-family: 'Fraunces', serif;
+    border-bottom: 1px solid var(--rule);
+    background: rgba(212,162,76,0.02);
+  }
+  main { padding: 36px; }
+  section { margin-bottom: 40px; }
+  section:last-child { margin-bottom: 0; }
+  h2 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  h2::before {
+    content: attr(data-num);
+    color: var(--ink-faint);
+    font-weight: 400;
+  }
+  h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 20px 0 10px;
+  }
+  h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent-cool);
+    margin: 16px 0 8px;
+  }
+  p { margin-bottom: 12px; color: var(--ink); }
+  .dim { color: var(--ink-dim); }
+  strong { color: var(--accent); font-weight: 500; }
+  em { color: var(--accent-warm); font-style: italic; }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--grid);
+    padding: 1px 6px;
+    border-radius: 2px;
+    font-size: 12px;
+    color: var(--accent-cool);
+    border: 1px solid var(--rule);
+  }
+  ul { margin: 8px 0 12px 0; padding: 0; list-style: none; }
+  ul li { padding-left: 20px; position: relative; margin-bottom: 6px; }
+  ul li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); }
+  ol { margin: 8px 0 12px 22px; color: var(--ink); }
+  ol li { margin-bottom: 4px; }
+  .spec-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin: 16px 0;
+  }
+  .spec-cell { background: var(--bg-panel); padding: 12px 14px; }
+  .spec-cell .label {
+    font-size: 9px;
+    letter-spacing: 1.8px;
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .spec-cell .value { font-size: 15px; color: var(--accent); font-weight: 500; }
+  .spec-cell .unit { color: var(--ink-dim); font-size: 11px; margin-left: 3px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 12px; }
+  table th, table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--rule);
+    text-align: left;
+    vertical-align: top;
+  }
+  table th {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    background: var(--grid);
+    border-bottom: 1px solid var(--accent);
+  }
+  table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  table td.val { color: var(--accent-cool); font-weight: 500; }
+  table tfoot td {
+    border-top: 1px solid var(--accent);
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .callout {
+    border-left: 3px solid var(--accent-warm);
+    background: rgba(230,126,60,0.04);
+    padding: 12px 16px;
+    margin: 12px 0;
+    font-size: 12px;
+  }
+  .callout.crit {
+    border-left-color: var(--accent-rose);
+    background: rgba(201,122,122,0.05);
+  }
+  .callout.info {
+    border-left-color: var(--accent-cyan);
+    background: rgba(111,181,201,0.04);
+  }
+  .callout .tag {
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--accent-warm);
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .callout.crit .tag { color: var(--accent-rose); }
+  .callout.info .tag { color: var(--accent-cyan); }
+  .timeline { margin: 16px 0; border: 1px solid var(--rule); }
+  .week-header {
+    background: var(--grid);
+    padding: 8px 14px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+  }
+  .week-header .subtitle { color: var(--ink-dim); font-style: italic; font-family: 'Fraunces', serif; text-transform: none; letter-spacing: 0.5px; font-size: 11px; }
+  .timeline-row {
+    display: grid;
+    grid-template-columns: 80px 160px 1fr;
+    border-bottom: 1px solid var(--rule);
+    font-size: 12px;
+  }
+  .timeline-row:last-child { border-bottom: none; }
+  .timeline-row > div { padding: 8px 12px; border-right: 1px solid var(--rule); }
+  .timeline-row > div:last-child { border-right: none; }
+  .timeline-row .days {
+    background: var(--grid);
+    color: var(--accent);
+    font-weight: 500;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-align: center;
+    align-self: center;
+  }
+  .timeline-row .phase {
+    color: var(--ink);
+    font-family: 'Fraunces', serif;
+    font-size: 13px;
+    font-weight: 500;
+    align-self: center;
+  }
+  .timeline-row .detail { color: var(--ink-dim); font-size: 11px; }
+  a { color: var(--accent-cool); text-decoration: none; border-bottom: 1px dotted var(--accent-cool); }
+  a:hover { color: var(--accent); border-color: var(--accent); }
+  .risk-grid { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 12px 0; }
+  .risk {
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--accent-warm);
+    padding: 10px 14px;
+    font-size: 12px;
+    background: rgba(0,0,0,0.15);
+  }
+  .risk .p {
+    display: inline-block;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    color: var(--accent-warm);
+    margin-right: 8px;
+  }
+  footer.colophon {
+    padding: 20px 36px;
+    border-top: 1px solid var(--rule);
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .ascii-divider {
+    color: var(--ink-faint);
+    font-size: 10px;
+    text-align: center;
+    letter-spacing: 2px;
+    padding: 16px 0;
+    user-select: none;
+  }
+  pre.ascii {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    line-height: 1.45;
+    color: var(--ink-dim);
+    background: var(--grid);
+    padding: 16px;
+    border: 1px solid var(--rule);
+    overflow-x: auto;
+    margin: 12px 0;
+  }
+  pre.ascii .hl-r { color: var(--accent); }
+  pre.ascii .hl-b { color: var(--accent-cyan); }
+  pre.ascii .hl-g { color: var(--accent-cool); }
+  pre.ascii .hl-w { color: var(--accent-warm); }
+  pre.code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    line-height: 1.55;
+    color: var(--ink);
+    background: var(--grid);
+    padding: 14px 16px;
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--accent-cool);
+    overflow-x: auto;
+    margin: 12px 0;
+  }
+  pre.code .k { color: var(--accent-warm); }
+  pre.code .s { color: var(--accent-cool); }
+  pre.code .n { color: var(--accent); }
+  pre.code .c { color: var(--ink-faint); font-style: italic; }
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .two-col-3-2 {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    gap: 20px;
+  }
+  /* Rotating visual — vertical blade */
+  .rotor-viz {
+    margin: 16px auto;
+    display: flex;
+    justify-content: center;
+    padding: 24px 0;
+    background: radial-gradient(ellipse at center, rgba(230,126,60,0.06), transparent 70%);
+    border: 1px solid var(--rule);
+  }
+  .rotor-svg { width: 360px; height: 360px; }
+  .tab-stamp {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    margin-right: 6px;
+  }
+  .tab-stamp.rotor { color: var(--accent-warm); border-color: var(--accent-warm); }
+  .tab-stamp.base { color: var(--accent-cool); border-color: var(--accent-cool); }
+  @media (max-width: 700px) {
+    body { padding: 16px 8px; font-size: 12px; }
+    main, header.masthead, footer.colophon { padding-left: 20px; padding-right: 20px; }
+    h1 { font-size: 22px; }
+    .timeline-row { grid-template-columns: 60px 1fr; }
+    .timeline-row .detail { grid-column: 1 / -1; border-right: none; border-top: 1px solid var(--rule); }
+    .two-col, .two-col-3-2 { grid-template-columns: 1fr; }
+    .rotor-svg { width: 280px; height: 280px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    <div>
+      <div class="doc-id">DOC · VOL-1 · build roadmap</div>
+      <h1>Volumetric <em>POV</em> Display<br>MkI &mdash; Rotating Blade</h1>
+    </div>
+    <div class="meta-block">
+      <span class="rev-stamp">REV B / PLAN</span><br>
+      PERSONAL · BUILD<br>
+      <span style="color:var(--accent);">target 1800 rpm</span>
+    </div>
+  </header>
+
+  <div class="tagline">
+    &mdash; A vertical-blade POV display in the tradition of Mitxela's Candle. 12&times;12 APA102C matrix on a spinning PCB, inductively powered from a stationary base, dual-IR phase lock, published end-to-end.
+  </div>
+
+  <main>
+
+    <section>
+      <h2 data-num="§ 01">Concept &amp; physics</h2>
+      <p>A thin vertical PCB &mdash; the <strong>rotor blade</strong> &mdash; carries a 12&times;12 APA102C matrix on its front face. The blade mounts onto a motor shaft through a hole in its centerline. The motor sits in a stationary cylindrical <strong>base</strong> below. When the motor spins, the blade rotates about its own vertical centerline, and each row of LEDs sweeps a circle at its height. 144 such circles stacked produce a <strong>hollow cylindrical voxel volume</strong> that the eye perceives as a solid 3D image.</p>
+
+      <p>Two physical domains: the <em>stationary base</em> handles power, motor drive, motor speed control, and the IR emitter for rotor sync; the <em>spinning rotor</em> handles LEDs and rendering. They communicate only through an inductive power link (base&rarr;rotor) and two independent IR optical links (one each direction for angular alignment).</p>
+
+      <div class="rotor-viz">
+        <svg class="rotor-svg" viewBox="0 0 360 360">
+          <defs>
+            <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#d4a24c" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#d4a24c" stop-opacity="0"/>
+            </radialGradient>
+            <linearGradient id="bladeGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#141612"/>
+              <stop offset="100%" stop-color="#1a1c17"/>
+            </linearGradient>
+          </defs>
+          <!-- Ground / base disk -->
+          <ellipse cx="180" cy="320" rx="120" ry="18" fill="url(#glow)"/>
+          <ellipse cx="180" cy="320" rx="80" ry="12" fill="#1a1c17" stroke="#2a2c25" stroke-width="1"/>
+          <rect x="100" y="295" width="160" height="25" fill="#141612" stroke="#2a2c25" stroke-width="1" rx="2"/>
+          <text x="180" y="311" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#7a7568" letter-spacing="1.5">BASE PCB</text>
+
+          <!-- Shaft -->
+          <rect x="177" y="80" width="6" height="215" fill="#2a2c25"/>
+
+          <!-- Rotor blade — drawn edge-on with slight perspective, animation: rotate about vertical axis -->
+          <g transform-origin="180 187" style="transform-box: fill-box;">
+            <rect x="172" y="80" width="16" height="215" fill="url(#bladeGrad)" stroke="#d4a24c" stroke-width="0.5"/>
+            <!-- 12 rows of 12 LEDs — represented as dots going down -->
+            <g fill="#e67e3c">
+              <!-- row 1 -->
+              <circle cx="176" cy="92" r="1.2"/><circle cx="179" cy="92" r="1.2"/><circle cx="182" cy="92" r="1.2"/><circle cx="185" cy="92" r="1.2"/>
+              <!-- sparse sample (visual suggestion, not exhaustive) -->
+              <circle cx="176" cy="108" r="1.2"/><circle cx="179" cy="108" r="1.2"/><circle cx="182" cy="108" r="1.2"/><circle cx="185" cy="108" r="1.2"/>
+              <circle cx="176" cy="124" r="1.2"/><circle cx="179" cy="124" r="1.2"/><circle cx="182" cy="124" r="1.2"/><circle cx="185" cy="124" r="1.2"/>
+              <circle cx="176" cy="140" r="1.2"/><circle cx="179" cy="140" r="1.2"/><circle cx="182" cy="140" r="1.2"/><circle cx="185" cy="140" r="1.2"/>
+              <circle cx="176" cy="156" r="1.2"/><circle cx="179" cy="156" r="1.2"/><circle cx="182" cy="156" r="1.2"/><circle cx="185" cy="156" r="1.2"/>
+              <circle cx="176" cy="172" r="1.2"/><circle cx="179" cy="172" r="1.2"/><circle cx="182" cy="172" r="1.2"/><circle cx="185" cy="172" r="1.2"/>
+              <circle cx="176" cy="188" r="1.2"/><circle cx="179" cy="188" r="1.2"/><circle cx="182" cy="188" r="1.2"/><circle cx="185" cy="188" r="1.2"/>
+              <circle cx="176" cy="204" r="1.2"/><circle cx="179" cy="204" r="1.2"/><circle cx="182" cy="204" r="1.2"/><circle cx="185" cy="204" r="1.2"/>
+              <circle cx="176" cy="220" r="1.2"/><circle cx="179" cy="220" r="1.2"/><circle cx="182" cy="220" r="1.2"/><circle cx="185" cy="220" r="1.2"/>
+              <circle cx="176" cy="236" r="1.2"/><circle cx="179" cy="236" r="1.2"/><circle cx="182" cy="236" r="1.2"/><circle cx="185" cy="236" r="1.2"/>
+              <circle cx="176" cy="252" r="1.2"/><circle cx="179" cy="252" r="1.2"/><circle cx="182" cy="252" r="1.2"/><circle cx="185" cy="252" r="1.2"/>
+              <circle cx="176" cy="268" r="1.2"/><circle cx="179" cy="268" r="1.2"/><circle cx="182" cy="268" r="1.2"/><circle cx="185" cy="268" r="1.2"/>
+            </g>
+            <animateTransform attributeName="transform" type="rotate" from="0 180 187" to="360 180 187" dur="0.8s" repeatCount="indefinite"/>
+          </g>
+
+          <!-- Trails / swept volume -->
+          <ellipse cx="180" cy="92" rx="55" ry="8" fill="none" stroke="#d4a24c" stroke-opacity="0.15" stroke-dasharray="2 3"/>
+          <ellipse cx="180" cy="156" rx="55" ry="8" fill="none" stroke="#d4a24c" stroke-opacity="0.12" stroke-dasharray="2 3"/>
+          <ellipse cx="180" cy="220" rx="55" ry="8" fill="none" stroke="#d4a24c" stroke-opacity="0.1" stroke-dasharray="2 3"/>
+          <ellipse cx="180" cy="284" rx="55" ry="8" fill="none" stroke="#d4a24c" stroke-opacity="0.08" stroke-dasharray="2 3"/>
+
+          <!-- Axis arrow -->
+          <line x1="180" y1="60" x2="180" y2="80" stroke="#7a7568" stroke-width="0.5" stroke-dasharray="2 2"/>
+          <text x="180" y="50" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#7a7568" letter-spacing="1.5">AXIS · ↺</text>
+          <text x="180" y="350" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#7a7568" letter-spacing="2">BLADE · 1800 RPM · SIDE VIEW</text>
+        </svg>
+      </div>
+
+      <p class="dim">A rotating blade is geometrically efficient: 144 LEDs spun around their centerline produce the equivalent of ~21.6k voxels on a cylindrical shell. The key physical constraints &mdash; balance, inductive gap, and sync timing &mdash; all fall out of this simple mechanical picture.</p>
+    </section>
+
+    <section>
+      <h2 data-num="§ 02">Display geometry &amp; budget</h2>
+      <div class="spec-grid">
+        <div class="spec-cell"><div class="label">Blade dimensions</div><div class="value">15 &times; 100<span class="unit">mm</span></div></div>
+        <div class="spec-cell"><div class="label">LED matrix</div><div class="value">12 &times; 12<span class="unit">144 LEDs</span></div></div>
+        <div class="spec-cell"><div class="label">LED package</div><div class="value">APA102C-2020<span class="unit">RGB addressable</span></div></div>
+        <div class="spec-cell"><div class="label">Column spacing</div><div class="value">~1.1<span class="unit">mm</span></div></div>
+        <div class="spec-cell"><div class="label">Row spacing</div><div class="value">~7.5<span class="unit">mm</span></div></div>
+        <div class="spec-cell"><div class="label">Target RPM</div><div class="value">1800<span class="unit">30 Hz</span></div></div>
+        <div class="spec-cell"><div class="label">Angular slices</div><div class="value">~120<span class="unit">/ rev (3°)</span></div></div>
+        <div class="spec-cell"><div class="label">Voxel budget</div><div class="value">~17.3k<span class="unit">/ frame</span></div></div>
+        <div class="spec-cell"><div class="label">Rotor power</div><div class="value">~4<span class="unit">W avg · 7 W peak</span></div></div>
+        <div class="spec-cell"><div class="label">Swept volume</div><div class="value">15&times;15&times;100<span class="unit">mm cylinder</span></div></div>
+      </div>
+
+      <h4>Bandwidth sanity check</h4>
+      <p>APA102C frame = 32 bits/LED. 144 LEDs × 32 bits = <strong>4608 bits per column</strong>. At 8 MHz SPI that's ~576 µs per column update. At 1800 RPM = 30 Hz = 33.3 ms/rev. Budget for 120 angular slices/rev &rarr; 33.3/120 = 278 µs per slice. <em>SPI must be ≥ 16 MHz</em> to hit 120 slices; 8 MHz limits us to ~60 slices (6° resolution), which is still well above the perceptual threshold. Spec SPI at <strong>20 MHz</strong> for headroom.</p>
+
+      <h4>Power sanity check</h4>
+      <p>APA102C-2020 draws ~20 mA per LED at full white. 144 × 20 mA = <strong>2.88 A peak at 5 V = 14.4 W</strong> worst case. For realistic content (<30% average brightness, ~20% duty due to column scanning effect) the average is ~4 W. The inductive link must cover the average plus transient headroom. <strong>Firmware caps global brightness at 25%</strong> during MkI bring-up &mdash; this also protects rotor rail during inductive coupling variation.</p>
+
+      <div class="callout info">
+        <span class="tag">Design choice</span>
+        The reference spec I worked from suggested 6000 RPM and 12&times;10. I pushed back to 1800 RPM and 12&times;12 because: (1) 1800 RPM is 11&times; easier on balance and bearings; (2) mitxela's candle runs at ~1800 RPM and looks great; (3) 12&times;12 gives square angular/vertical resolution per degree which is aesthetically nicer. 3000 RPM is achievable as a post-MkI upgrade if the mechanical build is clean.
+      </div>
+    </section>
+
+    <section>
+      <h2 data-num="§ 03">System architecture</h2>
+      <pre class="ascii">
+  <span class="hl-r">ROTOR BLADE  (spins at 1800 rpm)</span>
+  ┌─────────────────────────────────────────────────────────────┐
+  │                                                             │
+  │   12×12 APA102C matrix (front face)                         │
+  │            │                                                │
+  │            │ SPI @ 20 MHz                                   │
+  │            ▼                                                │
+  │      <span class="hl-g">ESP32-S3-MINI-1</span>  ◄── IR sync pulse (phototransistor │
+  │      (dual-core, WiFi)         pointed DOWN, through hole   │
+  │            ▲                   in PCB underside)            │
+  │            │ 3.3 V                                          │
+  │      <span class="hl-b">RT9013 LDO</span>                                             │
+  │            ▲                                                │
+  │            │ 5 V                                            │
+  │      Bridge rectifier + 1000 µF bulk                        │
+  │            ▲                                                │
+  │       <span class="hl-w">RX coil</span> (horizontal, near shaft)                     │
+  └────────────│────────────────────────────────────────────────┘
+               │
+               │  ≈ ≈ ≈  Qi-compatible 5 W inductive link, 125 kHz
+               │                        gap 1–3 mm
+               │
+  ┌────────────│────────────────────────────────────────────────┐
+  │       <span class="hl-w">TX coil</span> (flush top face of base)                    │
+  │            ▲                                                │
+  │       Class-E driver (Qi TX module or discrete)             │
+  │            ▲                                                │
+  │   5 V rail ┼──► <span class="hl-b">Brushed DC motor</span> ◄── N-ch MOSFET (AO3400)   │
+  │            │         RF-310 / similar       ▲              │
+  │            │                                 │ PWM          │
+  │            │                            <span class="hl-g">STM32G031K8</span>          │
+  │            │                                 ▲              │
+  │            │                                 │              │
+  │            │                     <span class="hl-r">TCRT5000 IR sensor</span>        │
+  │            │                     (aimed UP at blade under-  │
+  │            │                      side; sees reflector tab) │
+  │            │                                                │
+  │            │                     <span class="hl-r">IR LED</span> (aimed UP through   │
+  │            │                      small aperture; rotor     │
+  │            │                      phototransistor sees it)  │
+  │   USB-C PD ►  TPS54302 buck → 5 V rail                      │
+  └─────────────────────────────────────────────────────────────┘
+  <span class="hl-r">BASE PCB (stationary)</span>
+</pre>
+
+      <h4>The two independent IR paths</h4>
+      <p>This is the part most people get wrong. The base has <strong>two IR components</strong> doing two different jobs, and the rotor has <strong>one</strong> doing a third:</p>
+      <ul>
+        <li><span class="tab-stamp base">BASE · OUT</span> <strong>IR LED</strong> (pointing UP, continuous on). Provides a fixed optical beacon for the rotor. Wired straight to 5 V through a current-limiting resistor &mdash; no GPIO needed.</li>
+        <li><span class="tab-stamp base">BASE · IN</span> <strong>TCRT5000 reflective sensor</strong> (pointing UP at rotor underside). Sees a white-soldermask reflector tab on the rotor once per revolution. Output wired to STM32 GPIO with EXTI interrupt. This is the <em>motor speed feedback</em>.</li>
+        <li><span class="tab-stamp rotor">ROTOR · IN</span> <strong>Phototransistor</strong> (pointing DOWN). Sees the base's IR LED once per revolution, through a small cutout / window in the rotor PCB. Wired to ESP32-S3 GPIO with interrupt on rising edge. This is the <em>image angular sync</em>.</li>
+      </ul>
+      <p>The two IR paths are completely decoupled electrically. They happen to fire at nearly the same moment each revolution (sub-ms offset) because the rotor's reflector tab and the rotor's IR window are placed at the same angular position &mdash; but nothing in the firmware depends on that. Each MCU uses its own IR pulse independently.</p>
+
+      <div class="callout">
+        <span class="tag">Why this over slip rings or a single IR</span>
+        Two IR paths is the cleanest way to get <em>independent, electrically isolated</em> sync on both sides. Slip rings at 1800 RPM wear and introduce electrical noise. Modulating data onto the inductive link is elegant but adds firmware complexity on both MCUs &mdash; not worth it for a once-per-rev signal. Two cheap optoelectronic paths is the right engineering trade.
+      </div>
+    </section>
+
+    <section>
+      <h2 data-num="§ 04">Recommended parts list</h2>
+
+      <h3>Rotor parts</h3>
+      <table>
+        <thead><tr><th>Component</th><th>Specific part</th><th>Notes</th><th class="num">Qty</th></tr></thead>
+        <tbody>
+          <tr><td>Rotor MCU</td><td class="val">ESP32-S3-MINI-1 (N8R2)</td><td>Dual-core, WiFi, 8 MB flash, 2 MB PSRAM, LCSC C2913202</td><td class="num">1</td></tr>
+          <tr><td>LEDs</td><td class="val">APA102C-2020</td><td>2 mm × 2 mm, RGB addressable, LCSC C2761795. Order 170 for spares.</td><td class="num">144</td></tr>
+          <tr><td>RX inductive coil</td><td class="val">Würth 760308101312</td><td>Qi 5 W receiver coil, 10 µH, or use Adafruit #1407 RX half</td><td class="num">1</td></tr>
+          <tr><td>Schottky bridge</td><td class="val">MB6S</td><td>0.5 A, 60 V — rectifies AC from RX coil</td><td class="num">1</td></tr>
+          <tr><td>Bulk cap</td><td class="val">1000 µF / 10 V low-ESR</td><td>Post-rectifier smoothing. Panasonic FR series.</td><td class="num">1</td></tr>
+          <tr><td>3.3 V LDO</td><td class="val">RT9013-33GB</td><td>500 mA SOT-23-5, low dropout, good PSRR</td><td class="num">1</td></tr>
+          <tr><td>Phototransistor</td><td class="val">TEFT4300</td><td>Bare IR phototransistor, 950 nm peak, fast response, 3 mm side-view</td><td class="num">1</td></tr>
+          <tr><td>Decoupling caps</td><td class="val">100 nF 0402 + 10 µF 0805</td><td>One 100 nF per 6 LEDs along the APA102C chain; 10 µF near ESP32 rails</td><td class="num">~30</td></tr>
+          <tr><td>Resistors</td><td class="val">Assorted 0402</td><td>Pull-ups, phototransistor bias, status LED</td><td class="num">~10</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Base parts</h3>
+      <table>
+        <thead><tr><th>Component</th><th>Specific part</th><th>Notes</th><th class="num">Qty</th></tr></thead>
+        <tbody>
+          <tr><td>Base MCU</td><td class="val">STM32G031K8T6</td><td>LQFP-32, 64 MHz Cortex-M0+, 64 KB flash, cheap. LCSC C529106.</td><td class="num">1</td></tr>
+          <tr><td>Motor</td><td class="val">RF-310FA-11400 or similar</td><td>Brushed DC, 3–6 V rated, 6000–8000 RPM no-load. PWM down to 1800 RPM. 2 mm shaft.</td><td class="num">1</td></tr>
+          <tr><td>Motor MOSFET</td><td class="val">AO3400A</td><td>N-channel, 5.8 A, logic-level gate (V<sub>GS(th)</sub> ~1 V). SOT-23.</td><td class="num">1</td></tr>
+          <tr><td>Flyback diode</td><td class="val">1N4148W</td><td>SOD-123, across motor terminals, cathode to motor +</td><td class="num">1</td></tr>
+          <tr><td>Motor decoupling</td><td class="val">100 nF + 10 nF ceramic</td><td>Directly across motor brush terminals — kills commutation noise</td><td class="num">2</td></tr>
+          <tr><td>TX inductive coil</td><td class="val">Würth 760308100110</td><td>Qi 5 W transmitter coil, 6.3 µH. Paired with matching 100 nF resonance cap.</td><td class="num">1</td></tr>
+          <tr><td>TX driver</td><td class="val">CH583 / BQ500212 / discrete Class-E</td><td>Simplest: off-the-shelf Qi TX module (Adafruit #1459 or similar). Custom option: discrete Class-E with MCU-generated 125 kHz gate drive.</td><td class="num">1</td></tr>
+          <tr><td>TCRT5000 IR sensor</td><td class="val">Vishay TCRT5000L</td><td>Reflective sensor with matched emitter + phototransistor. Looks UP at rotor underside.</td><td class="num">1</td></tr>
+          <tr><td>Base IR LED</td><td class="val">TSAL6200 or similar</td><td>940 nm IR emitter, ~100 mA continuous. Points UP through base top aperture.</td><td class="num">1</td></tr>
+          <tr><td>USB-C receptacle</td><td class="val">GCT USB4105-GF-A</td><td>USB 2.0 only, with CC resistors (5.1 kΩ to GND on CC1 + CC2)</td><td class="num">1</td></tr>
+          <tr><td>5 V buck</td><td class="val">TPS54302DDCR</td><td>Input 4.5–28 V, output 5 V @ 3 A. SOT-23-6. Alternative: AP63205.</td><td class="num">1</td></tr>
+          <tr><td>Debug header</td><td class="val">Samtec FTSH-105-01-L-DV</td><td>SWD / UART 2×5 0.05", for STM32 programming</td><td class="num">1</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Mechanical parts</h3>
+      <table>
+        <thead><tr><th>Component</th><th>Specific part</th><th>Notes</th><th class="num">Qty</th></tr></thead>
+        <tbody>
+          <tr><td>Bearings</td><td class="val">683ZZ (3 mm bore)</td><td>Miniature deep-groove, 3×7×3 mm, rated 30k+ RPM. Shields retain grease.</td><td class="num">2</td></tr>
+          <tr><td>Shaft</td><td class="val">3 mm stainless rod</td><td>Or use motor's own shaft if long enough (~30 mm exposed needed)</td><td class="num">1</td></tr>
+          <tr><td>Shaft coupler / hub</td><td class="val">3D printed, PETG</td><td>Collet-style clamp with M2 set screw onto flat filed on motor shaft</td><td class="num">1</td></tr>
+          <tr><td>Enclosure</td><td class="val">3D printed, PETG or ABS</td><td><em>Not</em> PLA — softens near motor. 80 mm OD × 50 mm tall.</td><td class="num">1</td></tr>
+          <tr><td>Safety dome</td><td class="val">Acrylic tube, 70 mm ID × 3 mm wall × 130 mm tall</td><td>Clear or frosted. Press-fit to base rim. Essential — blade at 1800 RPM is a hazard.</td><td class="num">1</td></tr>
+          <tr><td>Fasteners</td><td class="val">M2 × 6 mm, M2.5 × 8 mm</td><td>Motor mount, PCB mount, dome retention</td><td class="num">~12</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Total estimate</h3>
+      <table>
+        <tbody>
+          <tr><td>Rotor BOM (LCSC parts)</td><td class="num">₹ 1,400</td></tr>
+          <tr><td>Base BOM (LCSC + Qi TX module)</td><td class="num">₹ 1,800</td></tr>
+          <tr><td>2× PCBs (JLCPCB 5-piece order, rotor + base)</td><td class="num">₹ 1,500</td></tr>
+          <tr><td>Motor + bearings + shaft</td><td class="num">₹ 600</td></tr>
+          <tr><td>Enclosure + dome + fasteners</td><td class="num">₹ 800</td></tr>
+          <tr><td>Spares / rework allowance</td><td class="num">₹ 500</td></tr>
+        </tbody>
+        <tfoot><tr><td>Total estimate</td><td class="num">₹ 6,600</td></tr></tfoot>
+      </table>
+    </section>
+
+    <section>
+      <h2 data-num="§ 05">Mechanical design &amp; dimensions</h2>
+
+      <p>The mechanical stack must satisfy four simultaneous constraints: (1) rigid motor mount that holds the shaft perpendicular to the base within ±0.2°, (2) coil-to-coil gap of 1–3 mm held constant across all rotation angles, (3) rotor blade balanced around its rotation axis to within a gram-mm at the worst radius, and (4) safety enclosure that fully contains the blade if a solder joint fails at speed.</p>
+
+      <h3>Overall stack-up</h3>
+      <pre class="ascii">
+                        <span class="hl-r">AXIS OF ROTATION</span>
+                              │
+                              │        ▲ +Z
+   ┌──────────────────────────┼──────────────────────────┐
+   │                          │                          │  ◄ Clear acrylic dome
+   │                          │                          │     ID 70 mm, 3 mm wall
+   │                          │                          │     130 mm tall
+   │                          │                          │
+   │                  ┌───────┼───────┐                  │
+   │                  │   <span class="hl-w">ROTOR</span>   │                  │  ◄ Rotor blade
+   │                  │   BLADE   │                      │     15 × 100 × 1.6 mm
+   │                  │  12 × 12  │   (shaft through     │     144 APA102C on front
+   │                  │    LED    │    2.2 mm hole       │     ESP32-S3 on back
+   │                  │   MATRIX  │    at blade center)  │     RX coil on bottom
+   │                  │           │                      │
+   │                  │    ESP    │                      │
+   │                  │    RX     │                      │ — blade bottom ~10 mm
+   │                  │   COIL    │                      │     above base top face
+   │                  └─────┬─┬───┘                      │
+   │                        │ │ ◄── motor shaft (3 mm)   │
+   │  ┌─────────────────────┼─┼──────────────────────┐   │
+   │  │        TX COIL  ⊙═══╪═╪═══⊙                  │   │  ◄ Base PCB + top lid
+   │  │  (concentric with shaft, flush top face)     │   │     80 mm OD disk
+   │  │                     │ │                      │   │     5 mm PETG top
+   │  │      TCRT5000 ▲    │ │   ▲ IR LED           │   │
+   │  │      (up)          │ │   (up)               │   │
+   │  │                     │ │                      │   │
+   │  │           ┌─────────┴─┴─────────┐            │   │
+   │  │           │    MOTOR (RF-310)   │            │   │  ◄ Motor in PETG pocket
+   │  │           │     + 2× bearings   │            │   │     24 mm OD × 28 mm long
+   │  │           │     (683ZZ top +    │            │   │     3 mm shaft up
+   │  │           │      683ZZ bottom)  │            │   │
+   │  │           └─────────────────────┘            │   │
+   │  │                                              │   │
+   │  │  USB-C ►│  STM32G031  Buck  Motor MOSFET    │   │  ◄ Base PCB components
+   │  │         │                                    │   │     ring around motor pocket
+   │  └──────────────────────────────────────────────┘   │
+   └──────────────────────────────────────────────────────┘
+   ◄─────────────────── 80 mm OD ──────────────────────►
+</pre>
+
+      <h3>Key dimensions</h3>
+      <table>
+        <thead><tr><th>Element</th><th>Dimension</th><th>Tolerance / note</th></tr></thead>
+        <tbody>
+          <tr><td>Rotor blade</td><td class="val">15 × 100 × 1.6 mm</td><td>Standard JLC 2-layer FR-4, 1 oz copper</td></tr>
+          <tr><td>Rotor center hole</td><td class="val">Ø 2.2 mm</td><td>Motor shaft pass-through. Copper keep-out 2 mm radial around hole.</td></tr>
+          <tr><td>Rotor IR window</td><td class="val">Ø 3 mm hole at radius 15 mm from center, on underside half</td><td>Through-hole, no copper. Phototransistor faces down through this.</td></tr>
+          <tr><td>Rotor reflector tab</td><td class="val">5 × 5 mm white soldermask exposed copper pad, angular-aligned with IR window, on underside</td><td>Seen by TCRT5000 from below</td></tr>
+          <tr><td>Base PCB</td><td class="val">Ø 78 mm disk, 1.6 mm</td><td>Fits inside 80 mm OD enclosure with 1 mm clearance</td></tr>
+          <tr><td>Base motor pocket</td><td class="val">Ø 24.5 mm × 28 mm deep</td><td>0.5 mm clearance on motor body, hold by friction + dab of epoxy</td></tr>
+          <tr><td>TX coil position</td><td class="val">Flush-mounted in top lid, concentric with shaft axis</td><td>Coil inner diameter must clear 3 mm shaft + 2 mm margin</td></tr>
+          <tr><td>Coil gap</td><td class="val">1.5 mm nominal, 1–3 mm acceptable</td><td>Set by rotor hub height above base top surface</td></tr>
+          <tr><td>Motor shaft exposed</td><td class="val">~30 mm above motor body</td><td>Need clearance for RX coil on blade + blade height</td></tr>
+          <tr><td>Rotor vertical position</td><td class="val">Blade bottom ~10 mm above base top, blade center ~60 mm above</td><td>So that TX/RX coils are close, but blade CG is above bearings</td></tr>
+          <tr><td>Dome ID</td><td class="val">70 mm</td><td>Minimum 5 mm radial clearance from blade tip (radius 7.5 mm + 5 mm = 12.5 mm min; 70/2 - 7.5 = 27.5 mm actual — generous)</td></tr>
+          <tr><td>Dome height</td><td class="val">130 mm above base top</td><td>Covers full 100 mm blade + 10 mm mounting clearance + 20 mm top clearance</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Rotor hub — the critical mechanical part</h3>
+      <p>The 3D-printed hub connecting motor shaft to rotor PCB is where most amateur POV builds fail. Spec:</p>
+      <ul>
+        <li><strong>Collet-style clamp</strong>: printed as a split cylinder with an M2 bolt that draws the two halves together around the motor shaft. Prints in PETG with 100% infill, 0.15 mm layer height.</li>
+        <li><strong>Flat on motor shaft</strong>: file or Dremel a ~0.3 mm flat along 5 mm of the motor shaft length where the hub sits. The set screw bottoms on this flat. No flat = slip at startup torque.</li>
+        <li><strong>PCB mating surface</strong>: the hub has a flat circular face that the rotor PCB bonds to with cyanoacrylate + M2 bolt through the PCB center hole into a threaded insert in the hub.</li>
+        <li><strong>Height offset</strong>: hub dimensioned so that when seated on motor shaft, the rotor PCB's underside sits 10 mm above the base top face (sets TX/RX coil gap at 1.5 mm through coil thickness).</li>
+        <li><strong>Threadlocker</strong>: Loctite 243 on the M2 set screw after final alignment. Non-negotiable for 1800 RPM.</li>
+      </ul>
+
+      <h3>Balance — every gram matters</h3>
+      <p>At 1800 RPM (188.5 rad/s), a 1 g mass at 30 mm radius from the axis produces a centripetal force of 1.07 N rotating at 30 Hz. That force shows up as a sinusoidal wobble at the bearing. Cheap 683ZZ bearings tolerate this but make audible noise and wear faster. The rotor PCB must be designed for balance from day one:</p>
+      <ul>
+        <li><strong>Component layout</strong>: LEDs are the heaviest population (144 × ~30 mg = 4.3 g). Distribute evenly across the full 100 mm blade height. ESP32-S3-MINI-1 (~1 g) goes on the <em>back face, centered on the rotation axis</em>. Bulk cap (~1.5 g) also centered. RX coil (~3 g) centered radially, near the shaft at blade bottom.</li>
+        <li><strong>Copper counterweight</strong>: the LED-loaded front face will be slightly heavier. Add a 4×80 mm copper pour on the back face opposite the LED column centerline to compensate. Calculate on final layout.</li>
+        <li><strong>Trim weights</strong>: leave 3× small through-hole pads at the blade tip corners. After assembly, do static balance check by spinning slowly by hand on loose bearings; add micro-drops of solder to pads until wobble is imperceptible.</li>
+      </ul>
+
+      <div class="callout crit">
+        <span class="tag">Critical</span>
+        Do not run the rotor outside the acrylic dome above 300 RPM. A solder joint failure at 1800 RPM launches a 2020-size LED at ~14 m/s radially. The dome is eye protection.
+      </div>
+    </section>
+
+    <section>
+      <h2 data-num="§ 06">PCB design notes</h2>
+
+      <h3>Rotor PCB</h3>
+      <ul>
+        <li><strong>Stack-up</strong>: 2-layer, 1 oz copper, FR-4, 1.6 mm standard.</li>
+        <li><strong>SPI chain</strong>: 144 APA102C in a single daisy-chain, row-major order. MOSI + SCK from ESP32-S3 to LED[0] DI/CI; LED[0] DO/CO to LED[1] DI/CI; repeat. No pull-ups needed.</li>
+        <li><strong>Power plane</strong>: 5 V pour on the front face underneath and around the LED strip. GND pour on back face. Vias stitch the two planes with &lt; 5 mm spacing along the LED column. This minimizes ground loop area and supply inductance.</li>
+        <li><strong>Decoupling</strong>: 100 nF 0402 every 6th LED on the 5 V rail. 10 µF bulk near the rectifier and near the ESP32. 1000 µF electrolytic near the RX coil output.</li>
+        <li><strong>DRC rule</strong>: custom rule flagging any copper within 2 mm of the Ø 2.2 mm center hole. Vibration stress concentrates at the hole boundary — cracks traces there first.</li>
+        <li><strong>LED orientation</strong>: all 144 LEDs oriented identically (pin 1 UP, for example), which massively simplifies SPI chain routing. Verify pin 1 marker convention against APA102C-2020 datasheet.</li>
+        <li><strong>ESP32-S3 placement</strong>: centered on the rotation axis (blade center), back face. Keep the antenna cutout oriented toward one of the blade edges.</li>
+        <li><strong>Phototransistor</strong>: TEFT4300 mounted on back face underneath the blade, collector facing down. The 3 mm IR window in the PCB directly above it gives optical path to base IR LED.</li>
+      </ul>
+
+      <h3>Base PCB</h3>
+      <ul>
+        <li><strong>Stack-up</strong>: 2-layer, 1 oz copper, FR-4, 1.6 mm. Ø 78 mm disk.</li>
+        <li><strong>Motor cutout</strong>: central Ø 25 mm circular cutout accommodates the motor pocket in the enclosure. All components ring around this cutout.</li>
+        <li><strong>TX coil keepout</strong>: 2 mm radial keepout around the TX coil footprint. No copper traces underneath (pours ok if needed for shielding, but ideally leave clear).</li>
+        <li><strong>Thermal relief on MOSFET</strong>: the AO3400 motor MOSFET dissipates 200–400 mW at 1800 RPM. Give it a 10×10 mm copper pour on drain pad.</li>
+        <li><strong>USB-C</strong>: place at board edge with a cutout in the enclosure sidewall. CC1 + CC2 with 5.1 kΩ to GND (UFP config, USB 2.0 only).</li>
+        <li><strong>SWD header</strong>: place at accessible edge. Samtec FTSH 2×5 0.05" pitch.</li>
+        <li><strong>Star ground</strong>: separate analog ground (TCRT5000 output, STM32 analog ref) from power ground (motor, TX coil driver). Join at a single star point near the USB-C GND pin.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2 data-num="§ 07">Firmware architecture &amp; code structure</h2>
+
+      <p>Two completely independent codebases. They share no code and communicate only through the IR optical pulses. Each MCU has its own repository folder, its own build system, its own test harness.</p>
+
+      <h3>Base firmware — STM32G031</h3>
+      <p>Language: C (bare-metal with STM32Cube HAL, or libopencm3 if you prefer). No RTOS. Interrupt-driven. Target binary &lt; 16 KB.</p>
+
+      <pre class="code"><span class="c">// base/src/main.c — structure overview</span>
+
+<span class="c">// ─── Hardware map ───</span>
+<span class="c">// PA6  — TIM1_CH1 PWM output to motor MOSFET gate</span>
+<span class="c">// PA1  — EXTI1 input from TCRT5000 (rising edge = reflector tab passed)</span>
+<span class="c">// PB6  — USART1 TX (debug)</span>
+<span class="c">// PA13/PA14 — SWD</span>
+
+<span class="c">// ─── Globals ───</span>
+<span class="k">volatile</span> <span class="k">uint32_t</span> last_ir_tick = <span class="n">0</span>;
+<span class="k">volatile</span> <span class="k">uint32_t</span> period_ticks = <span class="n">0</span>;    <span class="c">// from IR — one revolution</span>
+<span class="k">volatile</span> <span class="k">float</span>    rpm          = <span class="n">0</span>;
+<span class="k">volatile</span> <span class="k">float</span>    pwm_duty     = <span class="n">0.30f</span>;  <span class="c">// start at 30%, ramp up</span>
+
+<span class="k">static</span> <span class="k">const</span> <span class="k">float</span> RPM_SETPOINT = <span class="n">1800.0f</span>;
+<span class="k">static</span> <span class="k">const</span> <span class="k">float</span> KP           = <span class="n">0.00015f</span>;
+<span class="k">static</span> <span class="k">const</span> <span class="k">float</span> KI           = <span class="n">0.00002f</span>;
+<span class="k">static</span> <span class="k">float</span> integral_err        = <span class="n">0</span>;
+
+<span class="c">// ─── ISR: EXTI1 — fires on every IR reflector pulse ───</span>
+<span class="k">void</span> EXTI0_1_IRQHandler(<span class="k">void</span>) {
+    <span class="k">if</span> (EXTI->RPR1 &amp; EXTI_RPR1_RPIF1) {
+        <span class="k">uint32_t</span> now = TIM2->CNT;
+        period_ticks = now - last_ir_tick;
+        last_ir_tick = now;
+
+        rpm = <span class="n">60.0f</span> * TIM2_HZ / (<span class="k">float</span>)period_ticks;
+
+        <span class="c">// PI controller</span>
+        <span class="k">float</span> err = RPM_SETPOINT - rpm;
+        integral_err += err;
+        <span class="k">if</span> (integral_err > <span class="n">10000</span>) integral_err = <span class="n">10000</span>;
+        <span class="k">if</span> (integral_err &lt; -<span class="n">10000</span>) integral_err = -<span class="n">10000</span>;
+
+        pwm_duty += KP * err + KI * integral_err;
+        <span class="k">if</span> (pwm_duty > <span class="n">0.95f</span>) pwm_duty = <span class="n">0.95f</span>;
+        <span class="k">if</span> (pwm_duty &lt; <span class="n">0.10f</span>) pwm_duty = <span class="n">0.10f</span>;
+
+        TIM1->CCR1 = (<span class="k">uint32_t</span>)(pwm_duty * TIM1->ARR);
+
+        EXTI->RPR1 = EXTI_RPR1_RPIF1;  <span class="c">// clear flag</span>
+    }
+}
+
+<span class="k">int</span> main(<span class="k">void</span>) {
+    hal_init();           <span class="c">// clocks at 64 MHz</span>
+    gpio_init();
+    tim1_pwm_init(<span class="n">20000</span>); <span class="c">// 20 kHz PWM, above audible</span>
+    tim2_counter_init();  <span class="c">// free-running @ 1 MHz for period measurement</span>
+    exti_init_pa1();
+    uart_init(<span class="n">115200</span>);
+
+    <span class="c">// Soft-start: ramp PWM from 0 to 30% over 2 seconds before closing loop</span>
+    soft_start_motor();
+
+    <span class="k">while</span> (<span class="n">1</span>) {
+        <span class="c">// Main loop: log, watchdog pet, house-keeping</span>
+        <span class="k">if</span> (ticks_elapsed(<span class="n">500</span>)) {
+            uart_printf(<span class="s">"RPM=%.1f DUTY=%.2f\r\n"</span>, rpm, pwm_duty);
+        }
+        IWDG_Kick();
+        __WFI();  <span class="c">// sleep until next interrupt</span>
+    }
+}</pre>
+
+      <p class="dim">The PI loop runs inside the IR ISR. This is intentional — the natural control rate equals the mechanical sample rate (one update per rev = 30 Hz at 1800 RPM), which is plenty fast for a motor with ~100 ms mechanical time constant. No separate PID task needed.</p>
+
+      <h3>Rotor firmware — ESP32-S3</h3>
+      <p>Language: C++ on ESP-IDF (Arduino framework also fine for MkI). Dual-core, FreeRTOS. Core 1 reserved for timing-critical ISRs and SPI; Core 0 runs WiFi + render tasks.</p>
+
+      <pre class="code"><span class="c">// rotor/main/rotor.cpp — structure overview</span>
+
+<span class="c">// ─── Hardware map ───</span>
+<span class="c">// GPIO11 — SPI MOSI (to APA102 DI)</span>
+<span class="c">// GPIO12 — SPI SCK  (to APA102 CI)</span>
+<span class="c">// GPIO3  — IR phototransistor input (GPIO interrupt)</span>
+<span class="c">// GPIO2  — onboard status LED (optional)</span>
+
+<span class="k">constexpr</span> <span class="k">int</span> COLS = <span class="n">12</span>;  <span class="c">// angular slices we target (derived from timing)</span>
+<span class="k">constexpr</span> <span class="k">int</span> ROWS = <span class="n">12</span>;  <span class="c">// vertical LED rows</span>
+<span class="k">constexpr</span> <span class="k">int</span> N_LEDS = ROWS * COLS; <span class="c">// 144 total LEDs, but display column count is typically higher</span>
+
+<span class="c">// Actually: the PHYSICAL matrix is 12x12 (per blade rotation we want 12 columns × 12 rows visible).</span>
+<span class="c">// But the ANGULAR resolution is higher — we push a new column pattern per angular slice.</span>
+<span class="c">// Typically COLS_ANGULAR = 60 to 120 (one SPI update per 3° to 6° of rotation).</span>
+<span class="k">constexpr</span> <span class="k">int</span> COLS_ANGULAR = <span class="n">60</span>;
+
+<span class="c">// ─── Framebuffer: one column of 12 rows × 4 bytes (APA102 format) ───</span>
+<span class="c">// framebuffer[angular_slice][row] = RGB value</span>
+<span class="k">uint8_t</span> framebuffer[COLS_ANGULAR][ROWS][<span class="n">4</span>];  <span class="c">// ~2.8 KB, fits comfortably</span>
+
+<span class="c">// ─── Shared state ───</span>
+<span class="k">volatile</span> <span class="k">uint32_t</span> t_last_sync_us = <span class="n">0</span>;
+<span class="k">volatile</span> <span class="k">uint32_t</span> t_period_us    = <span class="n">33333</span>;  <span class="c">// 1800 RPM = 33.3 ms/rev</span>
+<span class="k">volatile</span> <span class="k">int</span>      current_col    = <span class="n">0</span>;
+SemaphoreHandle_t fb_mutex;
+
+<span class="c">// ─── ISR: IR sync pulse (Core 1) ───</span>
+<span class="k">void</span> IRAM_ATTR ir_sync_isr() {
+    <span class="k">uint32_t</span> now = esp_timer_get_time();
+    t_period_us = now - t_last_sync_us;
+    t_last_sync_us = now;
+    current_col = <span class="n">0</span>;
+    <span class="c">// Reload column timer for next tick</span>
+    column_timer_set_interval(t_period_us / COLS_ANGULAR);
+}
+
+<span class="c">// ─── ISR: column advance timer (Core 1) ───</span>
+<span class="k">void</span> IRAM_ATTR column_tick_isr() {
+    <span class="c">// Push this column's 12 LED frames over SPI</span>
+    <span class="c">// APA102 protocol: start frame (32b zero) + 12 × LED frame + end frame (32b 0xFF)</span>
+    spi_dma_burst(&amp;framebuffer[current_col][<span class="n">0</span>][<span class="n">0</span>], ROWS * <span class="n">4</span>);
+
+    current_col++;
+    <span class="k">if</span> (current_col &gt;= COLS_ANGULAR) current_col = <span class="n">0</span>;
+}
+
+<span class="c">// ─── Task: render (Core 0) ───</span>
+<span class="k">void</span> render_task(<span class="k">void</span>* arg) {
+    <span class="k">while</span> (<span class="n">1</span>) {
+        Shape* s = active_shape;
+        <span class="k">if</span> (xSemaphoreTake(fb_mutex, portMAX_DELAY) == pdTRUE) {
+            <span class="k">for</span> (<span class="k">int</span> col = <span class="n">0</span>; col &lt; COLS_ANGULAR; col++) {
+                <span class="k">float</span> theta = <span class="n">2.0f</span> * M_PI * col / COLS_ANGULAR;
+                <span class="k">for</span> (<span class="k">int</span> row = <span class="n">0</span>; row &lt; ROWS; row++) {
+                    <span class="k">float</span> y = (<span class="k">float</span>)row / (ROWS - <span class="n">1</span>) - <span class="n">0.5f</span>;  <span class="c">// -0.5 .. +0.5</span>
+                    <span class="c">// Shape function returns RGB given (theta, y); LED radial position r is known per row (fixed)</span>
+                    RGB c = s-&gt;sample(theta, y);
+                    apa102_write(framebuffer[col][row], c.r, c.g, c.b, GLOBAL_BRIGHTNESS);
+                }
+            }
+            xSemaphoreGive(fb_mutex);
+        }
+        vTaskDelay(pdMS_TO_TICKS(<span class="n">33</span>));  <span class="c">// ~30 Hz render update</span>
+    }
+}
+
+<span class="c">// ─── Task: WiFi server (Core 0) ───</span>
+<span class="k">void</span> wifi_task(<span class="k">void</span>* arg) {
+    <span class="c">// ESPAsyncWebServer, POST /shape endpoint accepts JSON config</span>
+    <span class="c">// Changes active_shape pointer — never touches framebuffer directly</span>
+}
+
+<span class="k">extern</span> <span class="s">"C"</span> <span class="k">void</span> app_main() {
+    fb_mutex = xSemaphoreCreateMutex();
+
+    spi_init_dma();                     <span class="c">// 20 MHz, half-duplex, no CS</span>
+    gpio_attach_interrupt(IR_PIN, ir_sync_isr, RISING);
+    column_timer_init(column_tick_isr);
+
+    <span class="c">// Pin the render and wifi tasks to core 0</span>
+    xTaskCreatePinnedToCore(render_task, <span class="s">"render"</span>, <span class="n">8192</span>, NULL, <span class="n">5</span>, NULL, <span class="n">0</span>);
+    xTaskCreatePinnedToCore(wifi_task,   <span class="s">"wifi"</span>,   <span class="n">8192</span>, NULL, <span class="n">4</span>, NULL, <span class="n">0</span>);
+    <span class="c">// Core 1 is left free — only ISRs run there</span>
+}</pre>
+
+      <h3>Shape system</h3>
+      <p>Each shape is a function <code>RGB sample(float theta, float y)</code>. No voxel file format, no buffers to upload. Add new shapes as C++ classes implementing the <code>Shape</code> interface, compile, flash. WiFi endpoint switches between them at runtime.</p>
+
+      <pre class="code"><span class="c">// rotor/main/shapes.h</span>
+<span class="k">struct</span> RGB { <span class="k">uint8_t</span> r, g, b; };
+
+<span class="k">class</span> Shape {
+<span class="k">public</span>:
+    <span class="k">virtual</span> RGB sample(<span class="k">float</span> theta, <span class="k">float</span> y) = <span class="n">0</span>;
+};
+
+<span class="k">class</span> Sphere : <span class="k">public</span> Shape {
+    <span class="k">float</span> R = <span class="n">0.4f</span>;
+<span class="k">public</span>:
+    RGB sample(<span class="k">float</span> theta, <span class="k">float</span> y) <span class="k">override</span> {
+        <span class="k">float</span> r = LED_RADIUS;  <span class="c">// each row is at fixed r; actually we iterate r too</span>
+        <span class="k">if</span> (r*r + y*y &lt; R*R) <span class="k">return</span> { <span class="n">200</span>, <span class="n">100</span>, <span class="n">40</span> };
+        <span class="k">return</span> { <span class="n">0</span>, <span class="n">0</span>, <span class="n">0</span> };
+    }
+};
+
+<span class="k">class</span> Helix : <span class="k">public</span> Shape {
+    <span class="k">float</span> pitch = <span class="n">2.0f</span>;
+<span class="k">public</span>:
+    RGB sample(<span class="k">float</span> theta, <span class="k">float</span> y) <span class="k">override</span> {
+        <span class="k">float</span> phase = fmodf(pitch * theta / (<span class="n">2</span> * M_PI) + y, <span class="n">1.0f</span>);
+        <span class="k">if</span> (fabs(phase) &lt; <span class="n">0.1f</span>) <span class="k">return</span> { <span class="n">0</span>, <span class="n">200</span>, <span class="n">100</span> };
+        <span class="k">return</span> { <span class="n">0</span>, <span class="n">0</span>, <span class="n">0</span> };
+    }
+};
+
+<span class="c">// Text, waveform, Lissajous, fluid sim etc. all implemented as Shape subclasses</span></pre>
+
+      <h3>Repository structure</h3>
+      <pre class="ascii">
+  VOL-1/
+  ├── README.md
+  ├── hardware/
+  │   ├── rotor/              KiCad 8 project, gerbers, PDF schematic
+  │   │   ├── vol1_rotor.kicad_pro
+  │   │   ├── gerbers/
+  │   │   └── bom.csv         LCSC part numbers, JLC-ready
+  │   └── base/               KiCad 8 project, gerbers, PDF schematic
+  ├── mechanical/
+  │   ├── STL/                all 3D-printable parts
+  │   │   ├── base_enclosure.stl
+  │   │   ├── base_top_lid.stl
+  │   │   ├── rotor_hub.stl
+  │   │   └── dome_retainer_ring.stl
+  │   └── source/             Fusion / OnShape / FreeCAD originals
+  ├── firmware/
+  │   ├── base/               STM32CubeIDE project for STM32G031
+  │   │   ├── Core/Src/main.c
+  │   │   ├── Core/Src/pid.c
+  │   │   └── Makefile
+  │   └── rotor/              ESP-IDF project
+  │       ├── main/
+  │       │   ├── rotor.cpp
+  │       │   ├── shapes.cpp
+  │       │   ├── apa102_spi.c
+  │       │   └── wifi_server.cpp
+  │       ├── CMakeLists.txt
+  │       └── sdkconfig.defaults
+  ├── docs/
+  │   ├── design-notes.md     derivation of timing, power budget
+  │   ├── bringup-log.md      chronological debug journal
+  │   └── photos/
+  └── media/
+      ├── demo.mp4            normal-exposure + long-exposure + slow-mo
+      └── hero.jpg</pre>
+    </section>
+
+    <section>
+      <h2 data-num="§ 08">3-week build roadmap</h2>
+
+      <div class="timeline">
+        <div class="week-header"><span>Week 1 · Schematic &amp; procure</span><span class="subtitle">PCB lead time is the critical path</span></div>
+        <div class="timeline-row"><div class="days">D 01</div><div class="phase">Parts order</div><div class="detail">Motor, bearings, Würth / Adafruit coil pair, 170× APA102C-2020, ESP32-S3-MINI-1, STM32G031, TCRT5000, passives. LCSC + Robu.in. 3–5 day shipping domestic.</div></div>
+        <div class="timeline-row"><div class="days">D 02</div><div class="phase">Rotor schematic</div><div class="detail">ESP32-S3, 12×12 APA102C chain, RX coil + rectifier + LDO, phototransistor circuit, decoupling network. KiCad 8.</div></div>
+        <div class="timeline-row"><div class="days">D 03</div><div class="phase">Base schematic</div><div class="detail">STM32G031, motor MOSFET + flyback, TX coil driver (Qi module path), TCRT5000 circuit, IR LED circuit, USB-C + buck, SWD header.</div></div>
+        <div class="timeline-row"><div class="days">D 04–05</div><div class="phase">Rotor layout</div><div class="detail">15×100 mm blade. Component placement for balance (LEDs front, ESP32 back-center, coil near shaft). Power pour on front, ground on back. Stitch vias. DRC + ERC clean.</div></div>
+        <div class="timeline-row"><div class="days">D 06</div><div class="phase">Base layout</div><div class="detail">Ø 78 mm disk, center motor cutout, components ringed around. Thermal relief on motor MOSFET. USB-C at edge. Fire both boards to JLCPCB same order.</div></div>
+        <div class="timeline-row"><div class="days">D 07</div><div class="phase">Mechanical CAD</div><div class="detail">Fusion / OnShape: enclosure, top lid, motor pocket, rotor hub, dome retainer. Print while PCBs ship (5-day overlap).</div></div>
+      </div>
+
+      <div class="timeline">
+        <div class="week-header"><span>Week 2 · Build &amp; bring-up</span><span class="subtitle">PCBs land ~D10–11 realistic from JLC to IN</span></div>
+        <div class="timeline-row"><div class="days">D 08–10</div><div class="phase">3D print + firmware skeletons</div><div class="detail">Print enclosure + hub + lid. Write base firmware skeleton (PWM + IR EXTI + PID scaffolding). Write rotor firmware skeleton (SPI DMA + column timer). Test rotor firmware on devkit with 12 LEDs manually wired.</div></div>
+        <div class="timeline-row"><div class="days">D 11</div><div class="phase">Rotor bring-up (static)</div><div class="detail">Solder rotor PCB. Power from bench supply via flying leads to 5 V rail (bypass inductive). Run APA102 test patterns: RGB walk, solid colors, per-column activation. Verify all 144 LEDs.</div></div>
+        <div class="timeline-row"><div class="days">D 12</div><div class="phase">Base bring-up (static)</div><div class="detail">Solder base PCB. Program STM32G031 via SWD. Verify PWM output on scope. Verify TCRT5000 detection with a reflector held over it by hand. Inductive link bench test: measure DC output on secondary side under load (use rotor PCB as load, by hand).</div></div>
+        <div class="timeline-row"><div class="days">D 13</div><div class="phase">Mechanical assembly</div><div class="detail">Mount motor in enclosure, press-fit bearings, install shaft, glue rotor hub, mount rotor PCB. Install TX coil in top lid. Verify coil-to-coil gap is 1.5 mm with rotor installed.</div></div>
+        <div class="timeline-row"><div class="days">D 14</div><div class="phase">Static balance</div><div class="detail">Spin rotor by hand with power off. Observe wobble. Add trim solder to tip pads until wobble is imperceptible. <em>Do not exceed 300 RPM without dome.</em></div></div>
+      </div>
+
+      <div class="timeline">
+        <div class="week-header"><span>Week 3 · Integrate &amp; ship</span><span class="subtitle">Mechanical tuning + firmware polish</span></div>
+        <div class="timeline-row"><div class="days">D 15</div><div class="phase">RPM ramp</div><div class="detail">Dome installed. Power from inductive link only. Open-loop PWM ramp: 20% → 40% → 60% → 80%. Watch for rotor rail droop on scope probe through dome gap. Confirm TCRT5000 fires 1×/rev.</div></div>
+        <div class="timeline-row"><div class="days">D 16</div><div class="phase">Motor PID close loop</div><div class="detail">Enable PID. Tune KP, KI until 1800 RPM setpoint holds ±1% for 5 minutes. Log over UART.</div></div>
+        <div class="timeline-row"><div class="days">D 17</div><div class="phase">Rotor sync lock</div><div class="detail">Verify ESP32 IR interrupt fires once per revolution. Column timer fires COLS_ANGULAR × 30 Hz. Display a single stationary vertical line — should hang in space motionless.</div></div>
+        <div class="timeline-row"><div class="days">D 18–19</div><div class="phase">Shapes</div><div class="detail">Implement Sphere, Cube, Helix, Torus. Then text ("HELLO" rendered at one angular position). Then RGB checker, Lissajous. Iterate on brightness + contrast.</div></div>
+        <div class="timeline-row"><div class="days">D 20</div><div class="phase">WiFi upload + polish</div><div class="detail">ESPAsyncWebServer endpoint /shape. Laptop → POST JSON → active shape switches. Reduce vibration with additional trim if needed.</div></div>
+        <div class="timeline-row"><div class="days">D 21</div><div class="phase">Ship</div><div class="detail">Long-exposure + slow-mo video. Hero photo. Write README with BOM, schematic PDFs, STL downloads, assembly guide. Push GitHub.</div></div>
+      </div>
+    </section>
+
+    <section>
+      <h2 data-num="§ 09">Honest risks</h2>
+      <div class="risk-grid">
+        <div class="risk"><span class="p">CRIT ·</span><strong>Balance is the #1 project killer.</strong> An unbalanced rotor at 1800 RPM damages bearings and is a safety hazard. Budget real time for iterative static balancing with trim solder. Test every intermediate speed (300 → 600 → 1000 → 1800) with the dome on.</div>
+        <div class="risk"><span class="p">HIGH ·</span><strong>Inductive power is tight.</strong> Qi 5 W coils deliver ~3.5 W at 2 mm gap in practice. Firmware must cap LED average brightness to keep rotor rail stable. Measure the rail on scope during bring-up.</div>
+        <div class="risk"><span class="p">HIGH ·</span><strong>3-week timeline assumes PCB lands on D10–11.</strong> JLCPCB to Bangalore can slip to D13. If so, compress week 3. Have a bench-wired rotor prototype ready as fallback.</div>
+        <div class="risk"><span class="p">MED  ·</span><strong>Motor shaft-to-hub slip.</strong> If the set screw doesn't bite a filed flat on the shaft, the rotor slips at high torque and the IR sync drifts. File a proper flat; use threadlocker.</div>
+        <div class="risk"><span class="p">MED  ·</span><strong>Rotor sync jitter.</strong> If the ESP32 IR interrupt has latency &gt; 50 µs the image will shear visibly. Pin the ISR to Core 1 with IRAM_ATTR. Keep the ISR under 10 µs.</div>
+        <div class="risk"><span class="p">MED  ·</span><strong>APA102C global brightness cap.</strong> Do not omit this. 144 LEDs × 20 mA @ full white = 2.88 A which no inductive link will supply. Cap at 25% for MkI; revisit after thermal/power measurements.</div>
+        <div class="risk"><span class="p">LOW  ·</span><strong>TCRT5000 ambient light sensitivity.</strong> Direct sunlight or room IR can false-trigger. Shroud the sensor in a short opaque tube pointing up, or use a 940 nm bandpass film.</div>
+      </div>
+    </section>
+
+    <section>
+      <h2 data-num="§ 10">Definition of done</h2>
+      <ul>
+        <li>Stable 1800 ±20 RPM for 30 minutes continuous. PID locked. No bearing whine.</li>
+        <li>All 144 APA102C LEDs driven. Global brightness cap enforced.</li>
+        <li>IR sync: ESP32 column counter resets every revolution, image hangs motionless in space.</li>
+        <li>At least 4 shapes: sphere, helix, text, RGB pattern. Switchable over WiFi.</li>
+        <li>Inductive link delivers rotor rail ≥ 4.7 V under full display load.</li>
+        <li>Dome installed during all spin tests above 300 RPM.</li>
+        <li>README with hero photo, demo video (long-exposure + slow-mo), BOM, gerbers, STLs, firmware binaries, build guide.</li>
+      </ul>
+    </section>
+
+    <div class="ascii-divider">· · · ─── END OF ROADMAP · REV B ─── · · ·</div>
+
+  </main>
+
+  <footer class="colophon">
+    <div>VOL-1 · build roadmap · <span style="color:var(--accent);">rev B / plan</span></div>
+    <div>carl · highcarlsagan.dev</div>
+  </footer>
+</div>
+</body>
+</html>

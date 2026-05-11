@@ -56,3 +56,6 @@ temp/# KiCad lock files
 *-backups/
 *.kicad_sch-bak
 *.kicad_pcb-bak
+
+# KiCad local history (contains its own .git)
+**/.history/
