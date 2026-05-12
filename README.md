@@ -156,6 +156,10 @@ MIT License - See LICENSE file for details
 
 ---
 
-**Author**: Mayank S
 **Project Start**: January 2026  
 **Status**: Active Development
+
+## Author
+
+**Mayank S (HighCarlSagan)** — [GitHub @HighCarlSagan](https://github.com/HighCarlSagan) · [highcarlsagan.dev](https://highcarlsagan.dev)
+
